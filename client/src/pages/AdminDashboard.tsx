@@ -270,7 +270,7 @@ export default function AdminDashboard() {
     name: '',
     description: '',
     category: 'Sea Fish',
-    imageUrl: 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/seer_fish.jpg',
     price: 399,
     weightLabel: '300g (Net Wt: 300g | Gross Wt: 450g)',
     stock: 50,
@@ -500,7 +500,7 @@ export default function AdminDashboard() {
       name: '',
       description: '',
       category: 'Sea Fish',
-      imageUrl: 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?auto=format&fit=crop&w=600&q=80',
+      imageUrl: '/images/seer_fish.jpg',
       price: 399,
       weightLabel: '300g (Net Wt: 300g | Gross Wt: 450g)',
       stock: 50,
@@ -519,7 +519,7 @@ export default function AdminDashboard() {
       name: p.name,
       description: p.description || '',
       category: p.category || 'Sea Fish',
-      imageUrl: p.images?.[0] || 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?auto=format&fit=crop&w=600&q=80',
+      imageUrl: p.images?.[0] || '/images/seer_fish.jpg',
       price: p.weights?.[0]?.price || 399,
       weightLabel: p.weights?.[0]?.label || '300g',
       stock: p.stock || 0,
@@ -1141,7 +1141,7 @@ export default function AdminDashboard() {
                       <tr key={p._id} className={`hover:bg-[#1E1713] transition-colors ${isLowStock ? 'bg-amber-950/10' : (isOutOfStock ? 'bg-rose-950/15' : '')}`}>
                         <td className="p-4">
                           <img
-                            src={p.images?.[0] || 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?auto=format&fit=crop&w=600&q=80'}
+                            src={p.images?.[0] || '/images/seer_fish.jpg'}
                             alt={p.name}
                             className="w-12 h-12 object-cover rounded-xl border border-stone-700 shadow-md"
                           />
@@ -1966,13 +1966,13 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-stone-300 font-bold">Image Picture URL</label>
+                  <label className="text-stone-300 font-bold">Image Picture URL (or /images/seer_fish.jpg, /images/tiger_prawns.jpg, etc.)</label>
                   <input
                     type="text"
                     required
                     value={formData.imageUrl}
                     onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                    placeholder="https://images.unsplash.com/..."
+                    placeholder="/images/seer_fish.jpg"
                     className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>

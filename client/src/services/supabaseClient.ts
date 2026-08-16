@@ -49,7 +49,7 @@ export const DEFAULT_CATALOG_SEEDS = [
     name: 'Seer Fish (Vanjaram) - Fresh Steak Cut',
     description: 'Cleaned, descaled & cut into firm juicy steaks. Caught fresh from Kasimedu Harbour.',
     category: 'Sea Fish',
-    images: ['https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?auto=format&fit=crop&w=600&q=80'],
+    images: ['/images/seer_fish.jpg'],
     weights: [{ label: '500g (Net Wt: 500g | Gross: 700g)', price: 699 }],
     cutting_options: ['Steak Cut', 'Curry Cut', 'Fry Cut', 'Boneless Cubes'],
     stock: 35, // In Stock
@@ -66,7 +66,7 @@ export const DEFAULT_CATALOG_SEEDS = [
     name: 'Jumbo Tiger Prawns - Cleaned & Deveined',
     description: 'Fresh Bay of Bengal sea prawns, tail-on, deshelled & deveined for quick frying.',
     category: 'Prawns & Shrimps',
-    images: ['https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=600&q=80'],
+    images: ['/images/tiger_prawns.jpg'],
     weights: [{ label: '350g (Net Wt: 350g | Gross: 500g)', price: 499 }],
     cutting_options: ['Tail-On Deveined', 'Butterflied', 'Whole Cleaned'],
     stock: 8, // LOW STOCK (<10)
@@ -83,7 +83,7 @@ export const DEFAULT_CATALOG_SEEDS = [
     name: 'White Pomfret (Vellai Vavval) - Whole Cleaned',
     description: 'Delicate white flesh with mild sweet flavor. Gutted and descaled for whole tandoori fry.',
     category: 'Sea Fish',
-    images: ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80'],
+    images: ['/images/white_pomfret.jpg'],
     weights: [{ label: '400g (Net Wt: 400g | Gross: 550g)', price: 549 }],
     cutting_options: ['Whole Cleaned & Gutted', 'Fry Cut', 'Curry Cut'],
     stock: 24, // In Stock
@@ -100,7 +100,7 @@ export const DEFAULT_CATALOG_SEEDS = [
     name: 'Live Blue Sea Mud Crabs - Cleaned',
     description: 'Fresh coastal sea crabs with tender sweet meat. Shell pre-cracked for easy cooking.',
     category: 'Crabs & Shellfish',
-    images: ['https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80'],
+    images: ['/images/blue_mud_crabs.jpg'],
     weights: [{ label: '500g (Net Wt: 500g | Gross: 750g)', price: 599 }],
     cutting_options: ['Cleaned Half-Cut', 'Whole Cleaned'],
     stock: 4, // CRITICAL LOW STOCK (<10)
@@ -117,7 +117,7 @@ export const DEFAULT_CATALOG_SEEDS = [
     name: 'Black Pomfret (Karuppu Vavval) - Curry Cut',
     description: 'Rich dark sea fish with distinct coastal flavor. Perfect for fiery Chettinad fish curry.',
     category: 'Sea Fish',
-    images: ['https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?auto=format&fit=crop&w=600&q=80'],
+    images: ['/images/black_pomfret.jpg'],
     weights: [{ label: '450g (Net Wt: 450g | Gross: 600g)', price: 429 }],
     cutting_options: ['Curry Cut', 'Steak Cut', 'Fry Cut'],
     stock: 6, // LOW STOCK (<10)
@@ -134,7 +134,7 @@ export const DEFAULT_CATALOG_SEEDS = [
     name: 'Nethili (Anchovy) - Headless Cleaned',
     description: 'Fresh little anchovies, head removed and gutted. Ideal for spicy deep fry and thogayal.',
     category: 'Sea Fish',
-    images: ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80'],
+    images: ['/images/nethili_anchovy.jpg'],
     weights: [{ label: '250g (Net Wt: 250g | Gross: 350g)', price: 199 }],
     cutting_options: ['Headless Cleaned', 'Whole Cleaned'],
     stock: 52, // In Stock
