@@ -6,44 +6,44 @@ export default function BrandLogo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }
 
   const imageSizes = {
     sm: 'h-8 max-w-[120px]',
-    md: 'h-10 sm:h-12 max-w-[180px]',
-    lg: 'h-14 sm:h-16 max-w-[240px]'
+    md: 'h-10 sm:h-11 max-w-[170px]',
+    lg: 'h-13 sm:h-15 max-w-[230px]'
   }
 
   const badgeSizes = {
-    sm: 'w-8 h-8 text-sm',
-    md: 'w-11 h-11 text-lg',
-    lg: 'w-14 h-14 text-2xl'
+    sm: 'w-7 h-7 text-xs font-bold',
+    md: 'w-9 h-9 text-sm font-bold',
+    lg: 'w-12 h-12 text-base font-bold'
   }
 
   const textSizes = {
-    sm: 'text-lg',
-    md: 'text-2xl',
-    lg: 'text-3xl'
+    sm: 'text-base',
+    md: 'text-xl',
+    lg: 'text-2xl'
   }
 
   return (
     <div className="flex items-center gap-2.5 cursor-pointer select-none group">
       {!imgError ? (
-        <div className="bg-slate-900/90 border border-cyan-500/30 p-1.5 rounded-2xl shadow-lg shadow-cyan-500/20 backdrop-blur-md flex items-center justify-center">
+        <div className="bg-[#1C1612]/90 border border-orange-500/30 p-1.5 rounded-2xl shadow-lg shadow-orange-500/10 backdrop-blur-md flex items-center justify-center">
           <img
             src={logoUrl}
             alt="Fish Mart Logo"
             onError={() => setImgError(true)}
-            className={`${imageSizes[size]} object-contain filter drop-shadow-[0_2px_8px_rgba(6,182,212,0.5)] transition-transform group-hover:scale-105 duration-300`}
+            className={`${imageSizes[size]} object-contain filter drop-shadow-[0_2px_8px_rgba(249,115,22,0.4)] transition-transform group-hover:scale-105 duration-300`}
           />
         </div>
       ) : (
-        <div className="flex items-center gap-3">
-          {/* High Visibility Fallback Badge */}
-          <div className={`${badgeSizes[size]} rounded-2xl bg-gradient-to-tr from-cyan-500 via-sky-400 to-teal-300 p-[2px] shadow-lg shadow-cyan-500/30`}>
-            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center font-black text-cyan-300">
-              🐟
+        <div className="flex items-center gap-2.5">
+          {/* Sunset Orange Fallback Badge */}
+          <div className={`${badgeSizes[size]} rounded-xl bg-gradient-to-tr from-orange-500 via-amber-500 to-rose-400 p-[1.5px] shadow-md shadow-orange-500/20`}>
+            <div className="w-full h-full bg-[#16110E] rounded-[10px] flex items-center justify-center font-extrabold text-orange-400">
+              FM
             </div>
           </div>
-          <div className={`font-brand ${textSizes[size]} font-black tracking-wider uppercase flex items-center gap-1`}>
-            <span className="text-white drop-shadow-md">FISH</span>
-            <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-teal-200 bg-clip-text text-transparent drop-shadow-sm">
+          <div className={`font-brand ${textSizes[size]} font-extrabold tracking-wider uppercase flex items-center gap-1.5`}>
+            <span className="text-stone-100 drop-shadow-sm">FISH</span>
+            <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-amber-200 bg-clip-text text-transparent drop-shadow-sm">
               MART
             </span>
           </div>

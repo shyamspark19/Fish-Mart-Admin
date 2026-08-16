@@ -15,9 +15,9 @@ export default function Landing() {
       tag: t('landing.tag'),
       headline: `${t('landing.heroTitle1')}\n${t('landing.heroTitle2')}`,
       sub: t('landing.heroSub'),
-      accent: '#06B6D4',
-      glow: 'rgba(6,182,212,0.18)',
-      bg: 'from-[#020B18] via-[#041C2C] to-[#021A2B]',
+      accent: '#FB923C',
+      glow: 'rgba(251,146,60,0.18)',
+      bg: 'from-[#140D09] via-[#28150B] to-[#120C08]',
       badge: t('landing.pioneering'),
       stats: [
         { label: t('stat.cities'), value: '12+' },
@@ -32,7 +32,7 @@ export default function Landing() {
       sub: t('feat.bayOfBengalDesc'),
       accent: '#F59E0B',
       glow: 'rgba(245,158,11,0.18)',
-      bg: 'from-[#0D0800] via-[#1C1000] to-[#0A0600]',
+      bg: 'from-[#170E08] via-[#2D1A08] to-[#140C06]',
       badge: t('landing.expressDelivery'),
       stats: [
         { label: t('stat.harbours'), value: '8' },
@@ -45,9 +45,9 @@ export default function Landing() {
       tag: t('feat.coldChain'),
       headline: `${t('feat.coldChain')}\n${t('feat.expertCleaning')}`,
       sub: t('feat.coldChainDesc'),
-      accent: '#10B981',
-      glow: 'rgba(16,185,129,0.18)',
-      bg: 'from-[#020D08] via-[#021A10] to-[#020F08]',
+      accent: '#F97316',
+      glow: 'rgba(249,115,22,0.18)',
+      bg: 'from-[#1A0F0A] via-[#2F180E] to-[#150D08]',
       badge: t('landing.chemFree'),
       stats: [
         { label: 'QC Standards', value: '12-Point' },
@@ -60,9 +60,9 @@ export default function Landing() {
       tag: t('brand.adminPortal'),
       headline: `${t('admin.dashboard')}\n${t('admin.control')}`,
       sub: t('landing.readySub'),
-      accent: '#38BDF8',
-      glow: 'rgba(56,189,248,0.18)',
-      bg: 'from-[#020D1A] via-[#061A30] to-[#020B18]',
+      accent: '#FB7185',
+      glow: 'rgba(251,113,133,0.18)',
+      bg: 'from-[#180E0D] via-[#2E1513] to-[#130B0A]',
       badge: t('landing.adminControl'),
       stats: [
         { label: 'Live Analytics', value: 'Real-Time' },
@@ -97,7 +97,7 @@ export default function Landing() {
   const banner = BANNERS[activeBanner] || BANNERS[0]
 
   return (
-    <div className="min-h-screen bg-[#050D1A] text-white font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[#0E0B09] text-stone-100 font-sans overflow-x-hidden">
 
       {/* Top Header with Brand & Language Selector */}
       <header className="absolute top-0 left-0 right-0 z-30 py-4 px-6 max-w-7xl mx-auto flex items-center justify-between">
@@ -106,7 +106,7 @@ export default function Landing() {
           <LanguageSelector />
           <button
             onClick={() => navigate('/login')}
-            className="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 rounded-xl text-xs font-bold text-slate-200 hover:text-white transition-all shadow-md backdrop-blur-md"
+            className="px-4 py-2 bg-[#1A1410]/80 hover:bg-[#251C16] border border-orange-500/25 rounded-xl text-xs font-bold text-orange-200 hover:text-white transition-all shadow-md backdrop-blur-md cursor-pointer"
           >
             {t('admin.signIn')}
           </button>
@@ -117,7 +117,7 @@ export default function Landing() {
       <section
         className={`relative min-h-[92vh] bg-gradient-to-br ${banner.bg} flex flex-col items-center justify-center px-4 pt-28 pb-20 transition-all duration-700 overflow-hidden`}
       >
-        {/* Animated glow orb */}
+        {/* Animated warm glow orb */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -146,23 +146,23 @@ export default function Landing() {
             style={{ textShadow: `0 0 60px ${banner.glow}` }}
           >
             {banner.headline.split('\n').map((line, i) => (
-              <span key={i} className={i === 0 ? 'block text-white' : 'block mt-1'} style={{ color: i === 1 ? banner.accent : 'white' }}>
+              <span key={i} className={i === 0 ? 'block text-stone-100' : 'block mt-1'} style={{ color: i === 1 ? banner.accent : 'inherit' }}>
                 {line}
               </span>
             ))}
           </h1>
 
           {/* Sub text */}
-          <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-normal">
+          <p className="text-stone-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-normal">
             {banner.sub}
           </p>
 
           {/* Live stats */}
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-2">
             {banner.stats.map((s, i) => (
-              <div key={i} className="text-center px-5 py-2.5 bg-slate-900/60 border border-slate-800 rounded-2xl backdrop-blur-sm shadow-md">
+              <div key={i} className="text-center px-5 py-2.5 bg-[#1C1511]/80 border border-orange-500/20 rounded-2xl backdrop-blur-sm shadow-md">
                 <div className="text-2xl font-bold" style={{ color: banner.accent }}>{s.value}</div>
-                <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mt-0.5">{s.label}</div>
+                <div className="text-[10px] font-semibold uppercase tracking-widest text-stone-400 mt-0.5">{s.label}</div>
               </div>
             ))}
           </div>
@@ -173,14 +173,14 @@ export default function Landing() {
               onClick={() => navigate('/login')}
               className="px-8 py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
               style={{
-                background: `linear-gradient(135deg, ${banner.accent}, ${banner.accent}cc)`,
-                color: '#050D1A',
+                background: `linear-gradient(135deg, ${banner.accent}, #F59E0B)`,
+                color: '#160E08',
                 boxShadow: `0 0 30px ${banner.glow}`
               }}
             >
               {t('landing.enterAdmin')} &rarr;
             </button>
-            <div className="text-xs text-slate-400 font-medium">
+            <div className="text-xs text-stone-400 font-medium">
               {t('admin.restricted')}
             </div>
           </div>
@@ -204,31 +204,31 @@ export default function Landing() {
       </section>
 
       {/* ── ABOUT STRIP ── */}
-      <section className="py-8 bg-[#070F1E] border-y border-cyan-500/10">
+      <section className="py-8 bg-[#140E0A] border-y border-orange-500/15">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-xs font-bold uppercase tracking-wider text-slate-400">
-            <span className="text-cyan-400">{t('landing.tag')}</span>
-            <span className="text-slate-700 hidden sm:block">•</span>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-xs font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-orange-400">{t('landing.tag')}</span>
+            <span className="text-stone-700 hidden sm:block">•</span>
             <span className="text-amber-400">{t('landing.expressDelivery')}</span>
-            <span className="text-slate-700 hidden sm:block">•</span>
-            <span className="text-emerald-400">{t('landing.chemFree')}</span>
-            <span className="text-slate-700 hidden sm:block">•</span>
-            <span className="text-sky-400">0 - 4°C Temperature Controlled</span>
+            <span className="text-stone-700 hidden sm:block">•</span>
+            <span className="text-orange-300">{t('landing.chemFree')}</span>
+            <span className="text-stone-700 hidden sm:block">•</span>
+            <span className="text-rose-300">0 - 4°C Temperature Controlled</span>
           </div>
         </div>
       </section>
 
       {/* ── FEATURES GRID ── */}
-      <section className="py-16 px-4 bg-[#050D1A]">
+      <section className="py-16 px-4 bg-[#0E0B09]">
         <div className="max-w-6xl mx-auto space-y-10">
           <div className="text-center space-y-2.5">
-            <div className="inline-flex items-center gap-2 px-4 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-xs font-bold uppercase tracking-widest text-cyan-400">
+            <div className="inline-flex items-center gap-2 px-4 py-1 bg-orange-500/10 border border-orange-500/30 rounded-full text-xs font-bold uppercase tracking-widest text-orange-400">
               {t('landing.whyUs')}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-100">
               {t('landing.whyUsSub')}
             </h2>
-            <p className="text-slate-400 max-w-xl mx-auto text-xs sm:text-sm">
+            <p className="text-stone-400 max-w-xl mx-auto text-xs sm:text-sm">
               {t('landing.whyUsDesc')}
             </p>
           </div>
@@ -237,15 +237,15 @@ export default function Landing() {
             {FEATURES.map((f, i) => (
               <div
                 key={i}
-                className="group bg-slate-900/60 border border-slate-800 hover:border-cyan-500/40 rounded-2xl p-6 space-y-2.5 transition-all duration-300 hover:bg-slate-900 hover:-translate-y-1 hover:shadow-xl shadow-slate-950/50"
+                className="group bg-[#17120E] border border-stone-800 hover:border-orange-500/40 rounded-2xl p-6 space-y-2.5 transition-all duration-300 hover:bg-[#1E1713] hover:-translate-y-1 hover:shadow-xl shadow-orange-950/20"
               >
-                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold text-xs">
+                <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-xs">
                   0{i + 1}
                 </div>
-                <div className="font-bold text-white text-sm group-hover:text-cyan-300 transition-colors">
+                <div className="font-bold text-stone-100 text-sm group-hover:text-orange-300 transition-colors">
                   {f.title}
                 </div>
-                <div className="text-slate-400 text-xs leading-relaxed font-normal">
+                <div className="text-stone-400 text-xs leading-relaxed font-normal">
                   {f.desc}
                 </div>
               </div>
@@ -255,16 +255,16 @@ export default function Landing() {
       </section>
 
       {/* ── CITIES COVERAGE ── */}
-      <section className="py-10 bg-slate-900/40 border-y border-slate-800/80">
+      <section className="py-10 bg-[#140E0A] border-y border-stone-800/80">
         <div className="max-w-6xl mx-auto px-4 space-y-4 text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+          <span className="text-xs font-bold uppercase tracking-widest text-stone-400">
             {t('landing.deliveringAcross')}
           </span>
           <div className="flex gap-2.5 flex-wrap justify-center px-4">
             {CITIES.map((city, i) => (
               <span
                 key={i}
-                className="px-3.5 py-1.5 bg-slate-800/70 border border-slate-700/70 rounded-xl text-xs font-medium text-slate-300 hover:border-cyan-500/50 hover:text-cyan-300 transition-colors"
+                className="px-3.5 py-1.5 bg-[#1C1511] border border-orange-500/15 rounded-xl text-xs font-medium text-stone-300 hover:border-orange-500/50 hover:text-orange-300 transition-colors"
               >
                 {city}
               </span>
@@ -274,20 +274,20 @@ export default function Landing() {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section className="py-20 px-4 bg-gradient-to-br from-[#070F1E] via-[#0A1628] to-[#050D1A] text-center relative overflow-hidden">
+      <section className="py-20 px-4 bg-gradient-to-br from-[#160E08] via-[#24130A] to-[#120B08] text-center relative overflow-hidden">
         <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-          <div className="inline-block px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-[11px] font-bold uppercase tracking-widest text-cyan-400">
+          <div className="inline-block px-3 py-1 bg-orange-500/10 border border-orange-500/30 rounded-full text-[11px] font-bold uppercase tracking-widest text-orange-400">
             {t('brand.adminPortal')}
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-100 leading-tight">
             {t('landing.readyTitle')}
           </h2>
-          <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+          <p className="text-stone-400 text-xs sm:text-sm leading-relaxed">
             {t('landing.readySub')}
           </p>
           <button
             onClick={() => navigate('/login')}
-            className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-sky-600 hover:from-cyan-400 hover:to-sky-500 text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-xl shadow-cyan-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            className="px-8 py-3 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-400 hover:via-amber-400 hover:to-orange-400 text-stone-950 font-bold text-xs uppercase tracking-widest rounded-xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
           >
             {t('landing.enterAdmin')} &rarr;
           </button>
@@ -295,12 +295,12 @@ export default function Landing() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="bg-slate-900 border-t border-slate-800 py-6 px-4 text-center text-xs text-slate-400">
+      <footer className="bg-[#120E0B] border-t border-stone-800 py-6 px-4 text-center text-xs text-stone-400">
         <div className="max-w-4xl mx-auto space-y-2">
-          <div className="font-bold text-cyan-400 uppercase tracking-wider">
+          <div className="font-bold text-orange-400 uppercase tracking-wider">
             {t('brand.title')} — {t('brand.subtitle')}
           </div>
-          <div className="text-[11px] text-slate-500">
+          <div className="text-[11px] text-stone-500">
             © 2026 Fish Mart Inc. All rights reserved. {t('admin.restricted')}.
           </div>
         </div>

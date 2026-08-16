@@ -185,7 +185,7 @@ const INITIAL_FEEDBACK: CustomerFeedback[] = [
 export default function AdminDashboard() {
   const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<'ANALYTICS' | 'PRODUCTS' | 'ORDERS' | 'MAPS' | 'DELIVERY'>('ANALYTICS')
-  const [deliverySubTab, setDeliverySubTab] = useState<'ORDERS' | 'PICKUP' | 'FEEDBACK' | 'PROFILES'>('PROFILES')
+  const [deliverySubTab, setDeliverySubTab] = useState<'PROFILES' | 'ORDERS' | 'PICKUP' | 'FEEDBACK'>('PROFILES')
 
   const [products, setProducts] = useState<Product[]>([])
   const [orders, setOrders] = useState<Order[]>([])
@@ -424,13 +424,14 @@ export default function AdminDashboard() {
     return acc
   }, {})
 
+  // Sunset palette for category distribution
   const categoryColors: { [key: string]: string } = {
-    'Sea Fish': '#F97316',
-    'Freshwater Fish': '#F59E0B',
-    'Prawns & Shrimps': '#06B6D4',
-    'Crabs & Shellfish': '#8B5CF6',
-    'Ready to Cook': '#10B981',
-    'Combo Packs': '#EC4899'
+    'Sea Fish': '#FB923C',        // Sunset Orange
+    'Freshwater Fish': '#F59E0B',  // Warm Amber
+    'Prawns & Shrimps': '#F97316', // Deep Orange
+    'Crabs & Shellfish': '#FB7185',// Sunset Rose
+    'Ready to Cook': '#FBBF24',    // Golden Amber
+    'Combo Packs': '#EA580C'       // Burnt Orange
   }
 
   let accumulatedPercent = 0
@@ -444,7 +445,7 @@ export default function AdminDashboard() {
       name: cat,
       count,
       percent,
-      color: categoryColors[cat] || '#3B82F6',
+      color: categoryColors[cat] || '#FB923C',
       dash: strokeDasharray,
       offset: strokeDashoffset
     }
@@ -456,10 +457,10 @@ export default function AdminDashboard() {
   const cancelledCount = safeOrders.filter(o => o.orderStatus === 'CANCELLED').length
 
   const statusData = [
-    { name: 'Delivered', color: '#10B981', count: deliveredCount },
-    { name: 'Out for Delivery', color: '#06B6D4', count: outForDeliveryCount },
+    { name: 'Delivered', color: '#34D399', count: deliveredCount },
+    { name: 'Out for Delivery', color: '#FB923C', count: outForDeliveryCount },
     { name: 'Preparing & Packed', color: '#F59E0B', count: preparingCount },
-    { name: 'Cancelled', color: '#EF4444', count: cancelledCount }
+    { name: 'Cancelled', color: '#F87171', count: cancelledCount }
   ]
 
   const handleOpenAddModal = () => {
@@ -610,7 +611,6 @@ export default function AdminDashboard() {
 
     setPartners(prev => prev.map(p => p.id === updated.id ? updated : p))
 
-    // Update partner name in assignments if changed
     if (updated.name !== editingPartner.name) {
       setAssignments(prev => prev.map(a => a.partnerId === updated.id ? { ...a, partnerName: updated.name } : a))
     }
@@ -643,12 +643,12 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 font-sans pb-16">
       {/* Top Operations Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#16110E] p-6 rounded-3xl border border-orange-500/20 shadow-xl">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-xs font-bold uppercase tracking-wider border border-cyan-500/20 mb-1.5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 text-orange-400 rounded-full text-xs font-bold uppercase tracking-wider border border-orange-500/25 mb-1.5">
             <span>{t('admin.liveOps')}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-100">
             {t('brand.title')} — {t('admin.control')}
           </h1>
         </div>
@@ -656,7 +656,7 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleOpenAddModal}
-            className="px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-sky-600 hover:from-cyan-400 hover:to-sky-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-cyan-500/20 transition-all active:scale-95 cursor-pointer"
+            className="px-4 py-2.5 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-400 hover:via-amber-400 hover:to-orange-400 text-stone-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-95 cursor-pointer"
           >
             + {t('btn.addNewProduct')}
           </button>
@@ -664,19 +664,19 @@ export default function AdminDashboard() {
       </div>
 
       {successMsg && (
-        <div className="p-4 bg-emerald-950/60 border border-emerald-500/50 text-emerald-200 rounded-2xl text-xs font-semibold animate-fade-in shadow-lg flex items-center justify-between">
+        <div className="p-4 bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 rounded-2xl text-xs font-semibold animate-fade-in shadow-lg flex items-center justify-between">
           <span>{successMsg}</span>
-          <button onClick={() => setSuccessMsg('')} className="text-emerald-400 hover:text-white font-bold text-xs ml-4">✕</button>
+          <button onClick={() => setSuccessMsg('')} className="text-emerald-400 hover:text-white font-bold text-xs ml-4 cursor-pointer">✕</button>
         </div>
       )}
 
       {/* Real-Time New Order Notification Banner */}
       {newOrderBanner && (
-        <div className="flex items-center justify-between p-4 bg-cyan-950/80 border border-cyan-500/60 text-cyan-200 rounded-2xl text-xs font-bold shadow-xl shadow-cyan-900/30 animate-fade-in">
+        <div className="flex items-center justify-between p-4 bg-[#23150D] border border-orange-500/40 text-orange-200 rounded-2xl text-xs font-bold shadow-xl shadow-orange-950/40 animate-fade-in">
           <div>{newOrderBanner}</div>
           <button
             onClick={() => { setActiveTab('ORDERS'); setNewOrderBanner(null) }}
-            className="px-3.5 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 rounded-xl font-bold text-[11px] uppercase tracking-wider transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/40 text-orange-300 rounded-xl font-bold text-[11px] uppercase tracking-wider transition-colors cursor-pointer"
           >
             View Orders &rarr;
           </button>
@@ -686,62 +686,62 @@ export default function AdminDashboard() {
       {/* 4 Analytics Top Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Gross Sales */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-2">
+        <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl p-5 shadow-xl space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{t('stat.grossSales')}</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-400">{t('stat.grossSales')}</span>
             <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-md text-[10px] font-bold border border-emerald-500/20">LIVE</span>
           </div>
-          <div className="text-3xl font-extrabold text-white">₹{totalRevenue.toLocaleString()}</div>
+          <div className="text-3xl font-extrabold text-stone-100">₹{totalRevenue.toLocaleString()}</div>
           <div className="text-[11px] font-medium text-emerald-400">
             {totalOrdersCount} Verified Placed Orders
           </div>
         </div>
 
         {/* Card 2: Net Profit */}
-        <div className="bg-slate-900 border border-cyan-500/20 rounded-3xl p-5 shadow-xl space-y-2 bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/30">
+        <div className="bg-[#16110E] border border-orange-500/25 rounded-3xl p-5 shadow-xl space-y-2 bg-gradient-to-br from-[#16110E] via-[#1E1510] to-[#28160E]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-300">{t('stat.netProfit')}</span>
-            <span className="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 rounded-md text-[10px] font-bold border border-cyan-500/20">{profitMargin}%</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-orange-300">{t('stat.netProfit')}</span>
+            <span className="px-2 py-0.5 bg-orange-500/15 text-orange-400 rounded-md text-[10px] font-bold border border-orange-500/30">{profitMargin}%</span>
           </div>
-          <div className="text-3xl font-extrabold text-cyan-400">₹{netProfit.toLocaleString()}</div>
-          <div className="text-[11px] font-medium text-cyan-300">
+          <div className="text-3xl font-extrabold text-orange-400">₹{netProfit.toLocaleString()}</div>
+          <div className="text-[11px] font-medium text-orange-300">
             Estimated Net Operating Margin
           </div>
         </div>
 
         {/* Card 3: Inventory Units */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-2">
+        <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl p-5 shadow-xl space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{t('stat.inventoryUnits')}</span>
-            <span className="px-2 py-0.5 bg-sky-500/10 text-sky-400 rounded-md text-[10px] font-bold border border-sky-500/20">STOCK</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-400">{t('stat.inventoryUnits')}</span>
+            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded-md text-[10px] font-bold border border-amber-500/20">STOCK</span>
           </div>
-          <div className="text-3xl font-extrabold text-white">{totalStockCount} Pcs</div>
-          <div className="text-[11px] font-medium text-sky-400">
+          <div className="text-3xl font-extrabold text-stone-100">{totalStockCount} Pcs</div>
+          <div className="text-[11px] font-medium text-amber-400">
             Across {products.length} Active Catalog Items
           </div>
         </div>
 
         {/* Card 4: Average Order Value */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-2">
+        <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl p-5 shadow-xl space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{t('stat.avgOrderValue')}</span>
-            <span className="px-2 py-0.5 bg-purple-500/10 text-purple-400 rounded-md text-[10px] font-bold border border-purple-500/20">AOV</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-400">{t('stat.avgOrderValue')}</span>
+            <span className="px-2 py-0.5 bg-rose-500/10 text-rose-400 rounded-md text-[10px] font-bold border border-rose-500/20">AOV</span>
           </div>
-          <div className="text-3xl font-extrabold text-purple-300">₹{averageOrderValue}</div>
-          <div className="text-[11px] font-medium text-slate-400">
+          <div className="text-3xl font-extrabold text-rose-300">₹{averageOrderValue}</div>
+          <div className="text-[11px] font-medium text-stone-400">
             Calculated per order checkout
           </div>
         </div>
       </div>
 
       {/* Admin 5 Main Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 border-b border-stone-800 pb-3 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab('ANALYTICS')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'ANALYTICS'
-              ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-md shadow-cyan-500/20'
-              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 font-bold shadow-md shadow-orange-500/20'
+              : 'bg-[#16110E] text-stone-400 hover:text-white border border-stone-800'
           }`}
         >
           {t('tab.analytics')}
@@ -751,8 +751,8 @@ export default function AdminDashboard() {
           onClick={() => setActiveTab('PRODUCTS')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'PRODUCTS'
-              ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-md shadow-cyan-500/20'
-              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 font-bold shadow-md shadow-orange-500/20'
+              : 'bg-[#16110E] text-stone-400 hover:text-white border border-stone-800'
           }`}
         >
           {t('tab.products')} ({safeProducts.length})
@@ -762,8 +762,8 @@ export default function AdminDashboard() {
           onClick={() => setActiveTab('ORDERS')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'ORDERS'
-              ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-md shadow-cyan-500/20'
-              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 font-bold shadow-md shadow-orange-500/20'
+              : 'bg-[#16110E] text-stone-400 hover:text-white border border-stone-800'
           }`}
         >
           {t('tab.orders')} ({safeOrders.length})
@@ -773,8 +773,8 @@ export default function AdminDashboard() {
           onClick={() => setActiveTab('DELIVERY')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'DELIVERY'
-              ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-md shadow-cyan-500/20'
-              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 font-bold shadow-md shadow-orange-500/20'
+              : 'bg-[#16110E] text-stone-400 hover:text-white border border-stone-800'
           }`}
         >
           {t('tab.delivery')} ({partners.length})
@@ -784,8 +784,8 @@ export default function AdminDashboard() {
           onClick={() => setActiveTab('MAPS')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'MAPS'
-              ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-md shadow-cyan-500/20'
-              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 font-bold shadow-md shadow-orange-500/20'
+              : 'bg-[#16110E] text-stone-400 hover:text-white border border-stone-800'
           }`}
         >
           {t('tab.maps')}
@@ -797,13 +797,13 @@ export default function AdminDashboard() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Category Inventory Share */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
+            <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl p-6 shadow-2xl space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-cyan-400">Live Category Inventory Distribution</h3>
-                  <p className="text-xs text-slate-400">Catalog share across seafood categories</p>
+                  <h3 className="text-base font-bold text-orange-400">Live Category Inventory Distribution</h3>
+                  <p className="text-xs text-stone-400">Catalog share across seafood categories</p>
                 </div>
-                <span className="text-xs font-semibold text-cyan-300 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/30">
+                <span className="text-xs font-semibold text-orange-300 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/30">
                   {safeProducts.length} Items
                 </span>
               </div>
@@ -812,7 +812,7 @@ export default function AdminDashboard() {
                 <div className="relative w-40 h-40 flex items-center justify-center">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                     <path
-                      className="text-slate-950"
+                      className="text-[#0E0B09]"
                       strokeWidth="3.8"
                       stroke="currentColor"
                       fill="none"
@@ -832,16 +832,16 @@ export default function AdminDashboard() {
                   </svg>
                   <div className="absolute text-center">
                     <div className="text-xl font-extrabold text-white">{products.length}</div>
-                    <div className="text-[10px] text-slate-400 uppercase font-semibold">SKUs</div>
+                    <div className="text-[10px] text-stone-400 uppercase font-semibold">SKUs</div>
                   </div>
                 </div>
 
                 <div className="space-y-2 text-xs font-medium w-full sm:w-auto">
                   {categoryData.map((cat, idx) => (
-                    <div key={idx} className="flex items-center justify-between gap-4 p-2 bg-slate-950 rounded-xl border border-slate-800">
+                    <div key={idx} className="flex items-center justify-between gap-4 p-2 bg-[#0E0B09] rounded-xl border border-stone-800">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
-                        <span className="text-slate-200">{cat.name}</span>
+                        <span className="text-stone-200">{cat.name}</span>
                       </div>
                       <span className="font-mono font-bold text-white">{cat.count} ({cat.percent}%)</span>
                     </div>
@@ -851,11 +851,11 @@ export default function AdminDashboard() {
             </div>
 
             {/* Order Status Distribution */}
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
+            <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl p-6 shadow-2xl space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-cyan-400">Order Fulfillment Breakdown</h3>
-                  <p className="text-xs text-slate-400">Real-time status tracking from customer database</p>
+                  <h3 className="text-base font-bold text-orange-400">Order Fulfillment Breakdown</h3>
+                  <p className="text-xs text-stone-400">Real-time status tracking from customer database</p>
                 </div>
                 <span className="text-xs font-semibold text-emerald-300 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30">
                   {totalOrdersCount} Total Orders
@@ -863,7 +863,7 @@ export default function AdminDashboard() {
               </div>
 
               {totalOrdersCount === 0 ? (
-                <div className="text-center py-12 text-slate-500 text-xs font-medium">
+                <div className="text-center py-12 text-stone-500 text-xs font-medium">
                   No orders recorded yet. Checkout orders will show live status breakdowns here.
                 </div>
               ) : (
@@ -873,10 +873,10 @@ export default function AdminDashboard() {
                     return (
                       <div key={idx} className="space-y-1.5">
                         <div className="flex justify-between text-xs font-semibold">
-                          <span className="text-slate-300">{st.name} ({percent}%)</span>
+                          <span className="text-stone-300">{st.name} ({percent}%)</span>
                           <span className="text-white font-mono">{st.count} Orders</span>
                         </div>
-                        <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                        <div className="w-full bg-[#0E0B09] h-2.5 rounded-full overflow-hidden border border-stone-800">
                           <div
                             className="h-full rounded-full transition-all duration-500"
                             style={{
@@ -894,51 +894,51 @@ export default function AdminDashboard() {
           </div>
 
           {/* Profit & Loss Statement Table */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-stone-800 pb-4">
               <div>
-                <h3 className="text-base font-bold text-cyan-400">Profit & Loss (P&L) Operating Breakdown</h3>
-                <p className="text-xs text-slate-400">Calculated directly from confirmed order revenues</p>
+                <h3 className="text-base font-bold text-orange-400">Profit & Loss (P&L) Operating Breakdown</h3>
+                <p className="text-xs text-stone-400">Calculated directly from confirmed order revenues</p>
               </div>
-              <span className="text-xs font-bold text-cyan-300 bg-cyan-500/10 px-3.5 py-1 rounded-full border border-cyan-500/30">
+              <span className="text-xs font-bold text-orange-300 bg-orange-500/10 px-3.5 py-1 rounded-full border border-orange-500/30">
                 {profitMargin}% Operating Margin
               </span>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-medium">
-                <thead className="bg-slate-950 text-slate-400 uppercase font-bold tracking-wider border-b border-slate-800">
+                <thead className="bg-[#0E0B09] text-stone-400 uppercase font-bold tracking-wider border-b border-stone-800">
                   <tr>
                     <th className="p-3.5">Financial Line Item</th>
                     <th className="p-3.5">Allocation Rate</th>
                     <th className="p-3.5 text-right">Amount (₹)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800 text-slate-200">
+                <tbody className="divide-y divide-stone-800 text-stone-200">
                   <tr>
                     <td className="p-3.5 font-bold text-white">Gross Sales Revenue</td>
                     <td className="p-3.5 text-emerald-400 font-semibold">100.0%</td>
                     <td className="p-3.5 text-right font-bold text-emerald-400">+₹{totalRevenue.toLocaleString()}</td>
                   </tr>
                   <tr>
-                    <td className="p-3.5 text-slate-300">(-) Direct Coastal Seafood Sourcing Cost</td>
-                    <td className="p-3.5 text-slate-400">55.0%</td>
+                    <td className="p-3.5 text-stone-300">(-) Direct Coastal Seafood Sourcing Cost</td>
+                    <td className="p-3.5 text-stone-400">55.0%</td>
                     <td className="p-3.5 text-right font-semibold text-rose-400">-₹{sourcingCost.toLocaleString()}</td>
                   </tr>
                   <tr>
-                    <td className="p-3.5 text-slate-300">(-) Cold-Chain Packaging & Delivery Logistics</td>
-                    <td className="p-3.5 text-slate-400">10.0%</td>
+                    <td className="p-3.5 text-stone-300">(-) Cold-Chain Packaging & Delivery Logistics</td>
+                    <td className="p-3.5 text-stone-400">10.0%</td>
                     <td className="p-3.5 text-right font-semibold text-rose-400">-₹{logisticsCost.toLocaleString()}</td>
                   </tr>
                   <tr>
-                    <td className="p-3.5 text-slate-300">(-) Spoilage, Returns & Order Cancellations</td>
-                    <td className="p-3.5 text-slate-400">2.0%</td>
+                    <td className="p-3.5 text-stone-300">(-) Spoilage, Returns & Order Cancellations</td>
+                    <td className="p-3.5 text-stone-400">2.0%</td>
                     <td className="p-3.5 text-right font-semibold text-rose-400">-₹{spoilageLoss.toLocaleString()}</td>
                   </tr>
-                  <tr className="bg-slate-950 font-bold text-sm text-cyan-400">
+                  <tr className="bg-[#0E0B09] font-bold text-sm text-orange-400">
                     <td className="p-4">Calculated Net Operating Profit</td>
                     <td className="p-4">{profitMargin}% Net Margin</td>
-                    <td className="p-4 text-right text-cyan-400">₹{netProfit.toLocaleString()}</td>
+                    <td className="p-4 text-right text-orange-400">₹{netProfit.toLocaleString()}</td>
                   </tr>
                 </tbody>
               </table>
@@ -949,18 +949,18 @@ export default function AdminDashboard() {
 
       {/* ── TAB 2: PRODUCTS ── */}
       {activeTab === 'PRODUCTS' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
-          <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
-            <h3 className="text-base font-bold text-cyan-400">Live Product & Stock Catalog</h3>
-            <span className="text-xs text-slate-400 font-medium">Total Inventory: {safeProducts.reduce((acc, p) => acc + (p.stock || 0), 0)} Units</span>
+        <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl overflow-hidden shadow-2xl">
+          <div className="p-5 border-b border-stone-800 flex items-center justify-between bg-[#0E0B09]/80">
+            <h3 className="text-base font-bold text-orange-400">Live Product & Stock Catalog</h3>
+            <span className="text-xs text-stone-400 font-medium">Total Inventory: {safeProducts.reduce((acc, p) => acc + (p.stock || 0), 0)} Units</span>
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-xs font-semibold text-cyan-400">Loading catalog items...</div>
+            <div className="p-12 text-center text-xs font-semibold text-orange-400">Loading catalog items...</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-950 text-slate-400 uppercase font-bold tracking-wider border-b border-slate-800">
+                <thead className="bg-[#0E0B09] text-stone-400 uppercase font-bold tracking-wider border-b border-stone-800">
                   <tr>
                     <th className="p-4">Picture</th>
                     <th className="p-4">Product Details</th>
@@ -970,26 +970,26 @@ export default function AdminDashboard() {
                     <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/80 text-slate-200">
+                <tbody className="divide-y divide-stone-800/80 text-stone-200">
                   {safeProducts.map(p => (
-                    <tr key={p._id} className="hover:bg-slate-800/50 transition-colors">
+                    <tr key={p._id} className="hover:bg-[#1E1713] transition-colors">
                       <td className="p-4">
                         <img
                           src={p.images?.[0] || 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?auto=format&fit=crop&w=600&q=80'}
                           alt={p.name}
-                          className="w-12 h-12 object-cover rounded-xl border border-slate-700 shadow-md"
+                          className="w-12 h-12 object-cover rounded-xl border border-stone-700 shadow-md"
                         />
                       </td>
                       <td className="p-4 space-y-0.5">
                         <div className="font-bold text-white text-sm">{p.name}</div>
                         {p.badge && (
-                          <span className="inline-block text-[10px] font-bold uppercase text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                          <span className="inline-block text-[10px] font-bold uppercase text-orange-300 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
                             {p.badge}
                           </span>
                         )}
-                        <div className="text-[11px] text-slate-400">{p.netWeight || '300g'} | {p.pieces || 'Standard'}</div>
+                        <div className="text-[11px] text-stone-400">{p.netWeight || '300g'} | {p.pieces || 'Standard'}</div>
                       </td>
-                      <td className="p-4 font-semibold text-sky-400">{p.category}</td>
+                      <td className="p-4 font-semibold text-amber-400">{p.category}</td>
                       <td className="p-4 font-bold text-white text-sm">
                         ₹{p.weights?.[0]?.price || 299}
                       </td>
@@ -997,7 +997,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleStockAdjust(p, -5)}
-                            className="px-2.5 py-1 bg-slate-950 hover:bg-slate-800 border border-slate-700 rounded-lg text-slate-300 font-semibold cursor-pointer"
+                            className="px-2.5 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold cursor-pointer"
                           >
                             -5
                           </button>
@@ -1006,7 +1006,7 @@ export default function AdminDashboard() {
                           </span>
                           <button
                             onClick={() => handleStockAdjust(p, +5)}
-                            className="px-2.5 py-1 bg-slate-950 hover:bg-slate-800 border border-slate-700 rounded-lg text-slate-300 font-semibold cursor-pointer"
+                            className="px-2.5 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold cursor-pointer"
                           >
                             +5
                           </button>
@@ -1015,13 +1015,13 @@ export default function AdminDashboard() {
                       <td className="p-4 text-right space-x-2">
                         <button
                           onClick={() => handleOpenEditModal(p)}
-                          className="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 rounded-xl font-semibold transition-colors cursor-pointer"
+                          className="px-3 py-1.5 bg-orange-500/15 hover:bg-orange-500/25 text-orange-300 border border-orange-500/30 rounded-xl font-semibold transition-colors cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(p._id, p.name)}
-                          className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 rounded-xl font-semibold transition-colors cursor-pointer"
+                          className="px-3 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 rounded-xl font-semibold transition-colors cursor-pointer"
                         >
                           Delete
                         </button>
@@ -1037,11 +1037,11 @@ export default function AdminDashboard() {
 
       {/* ── TAB 3: ORDERS ── */}
       {activeTab === 'ORDERS' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden">
-          <div className="p-5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-950/60">
+        <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl shadow-2xl overflow-hidden">
+          <div className="p-5 border-b border-stone-800 flex flex-wrap items-center justify-between gap-3 bg-[#0E0B09]/80">
             <div>
-              <h3 className="text-base font-bold text-cyan-400">Live Customer Orders</h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">{safeOrders.length} orders recorded in Supabase</p>
+              <h3 className="text-base font-bold text-orange-400">Live Customer Orders</h3>
+              <p className="text-[11px] text-stone-400 mt-0.5">{safeOrders.length} orders recorded in Supabase</p>
             </div>
             <div className="flex items-center gap-3">
               {(['PLACED', 'CONFIRMED', 'PREPARING', 'OUT_FOR_DELIVERY', 'DELIVERED'] as const).map(s => {
@@ -1050,7 +1050,7 @@ export default function AdminDashboard() {
                   PLACED: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
                   CONFIRMED: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
                   PREPARING: 'text-orange-400 bg-orange-500/10 border-orange-500/30',
-                  OUT_FOR_DELIVERY: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
+                  OUT_FOR_DELIVERY: 'text-orange-300 bg-orange-500/15 border-orange-500/30',
                   DELIVERED: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
                 }
                 return count > 0 ? (
@@ -1061,7 +1061,7 @@ export default function AdminDashboard() {
               })}
               <button
                 onClick={fetchData}
-                className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-500 to-sky-600 text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:from-cyan-400 hover:to-sky-500 transition-all cursor-pointer"
+                className="px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:from-orange-400 hover:to-amber-400 transition-all cursor-pointer"
               >
                 {t('btn.refresh')}
               </button>
@@ -1069,21 +1069,21 @@ export default function AdminDashboard() {
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-xs font-semibold text-cyan-400">Loading orders...</div>
+            <div className="p-12 text-center text-xs font-semibold text-orange-400">Loading orders...</div>
           ) : safeOrders.length === 0 ? (
-            <div className="text-center py-16 text-slate-500 text-xs font-medium">
+            <div className="text-center py-16 text-stone-500 text-xs font-medium">
               <div>No customer orders placed yet.</div>
-              <div className="text-slate-600 mt-1">Orders will appear here in real-time as customers place requests.</div>
+              <div className="text-stone-600 mt-1">Orders will appear here in real-time as customers place requests.</div>
             </div>
           ) : (
-            <div className="divide-y divide-slate-800">
+            <div className="divide-y divide-stone-800">
               {safeOrders.map(o => {
                 const statusColors: Record<string, string> = {
                   PLACED: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
                   CONFIRMED: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
                   PREPARING: 'text-orange-400 bg-orange-500/10 border-orange-500/30',
                   PACKED: 'text-violet-400 bg-violet-500/10 border-violet-500/30',
-                  OUT_FOR_DELIVERY: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
+                  OUT_FOR_DELIVERY: 'text-orange-300 bg-orange-500/15 border-orange-500/30',
                   DELIVERED: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
                   CANCELLED: 'text-rose-400 bg-rose-500/10 border-rose-500/30'
                 }
@@ -1092,30 +1092,30 @@ export default function AdminDashboard() {
                   : '—'
                 const totalItems = Array.isArray(o.items) ? o.items.reduce((s: number, i: any) => s + (i.quantity || 1), 0) : 0
                 return (
-                  <div key={o._id} className="p-5 hover:bg-slate-800/30 transition-colors">
+                  <div key={o._id} className="p-5 hover:bg-[#1C1510] transition-colors">
                     <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-sm font-bold text-cyan-400 font-mono">#{o.orderNumber || o._id?.slice(0, 8).toUpperCase()}</span>
-                          <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${statusColors[o.orderStatus] || 'text-slate-400 bg-slate-800 border-slate-700'}`}>
+                          <span className="text-sm font-bold text-orange-400 font-mono">#{o.orderNumber || o._id?.slice(0, 8).toUpperCase()}</span>
+                          <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${statusColors[o.orderStatus] || 'text-stone-400 bg-stone-800 border-stone-700'}`}>
                             {(o.orderStatus || 'PLACED').replace(/_/g, ' ')}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 text-[11px]">
                           <span className="text-white font-semibold">{o.address?.name || 'Customer'}</span>
-                          <span className="text-slate-400">{o.address?.phone || '—'}</span>
-                          <span className="text-slate-500">{orderTime}</span>
+                          <span className="text-stone-400">{o.address?.phone || '—'}</span>
+                          <span className="text-stone-500">{orderTime}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <div className="text-base font-extrabold text-white">₹{Number(o.total).toLocaleString()}</div>
-                          <div className="text-[10px] text-slate-400 font-medium">{o.paymentMethod} · {totalItems} item{totalItems !== 1 ? 's' : ''}</div>
+                          <div className="text-[10px] text-stone-400 font-medium">{o.paymentMethod} · {totalItems} item{totalItems !== 1 ? 's' : ''}</div>
                         </div>
                         <select
                           value={o.orderStatus || 'PLACED'}
                           onChange={(e) => handleUpdateOrderStatus(o._id, e.target.value)}
-                          className="bg-slate-900 border border-cyan-500/30 text-xs font-bold text-cyan-300 rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-500 cursor-pointer"
+                          className="bg-[#0E0B09] border border-orange-500/30 text-xs font-bold text-orange-300 rounded-xl px-3 py-2 focus:outline-none focus:border-orange-500 cursor-pointer"
                         >
                           {['PLACED', 'CONFIRMED', 'PREPARING', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].map(s => (
                             <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
@@ -1124,21 +1124,21 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-slate-400 mb-3 flex items-start gap-1.5">
-                      <span className="text-slate-300">{o.address?.street || o.address?.area || 'Address not provided'}{o.address?.city ? `, ${o.address.city}` : ''}</span>
+                    <div className="text-[11px] text-stone-400 mb-3 flex items-start gap-1.5">
+                      <span className="text-stone-300">{o.address?.street || o.address?.area || 'Address not provided'}{o.address?.city ? `, ${o.address.city}` : ''}</span>
                     </div>
 
                     {Array.isArray(o.items) && o.items.length > 0 && (
-                      <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2">
-                        <div className="text-[10px] font-bold uppercase text-cyan-400 tracking-wider mb-1">
+                      <div className="bg-[#0E0B09] border border-stone-800 rounded-xl p-3 space-y-2">
+                        <div className="text-[10px] font-bold uppercase text-orange-400 tracking-wider mb-1">
                           Ordered Items ({o.items.length})
                         </div>
                         {o.items.map((item: any, idx: number) => (
                           <div key={idx} className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-2 text-slate-200">
-                              <span className="text-cyan-400 font-bold">×{item.quantity || 1}</span>
+                            <div className="flex items-center gap-2 text-stone-200">
+                              <span className="text-orange-400 font-bold">×{item.quantity || 1}</span>
                               <span className="font-semibold text-white">{item.name || 'Seafood Item'}</span>
-                              <span className="text-slate-500">
+                              <span className="text-stone-500">
                                 {item.weightLabel || item.weight ? `· ${item.weightLabel || item.weight}` : ''}
                                 {item.cutting ? ` · ${item.cutting}` : ''}
                               </span>
@@ -1156,30 +1156,30 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* ── TAB 4: DELIVERY PARTNER FLEET MANAGEMENT (NEW SECTION) ── */}
+      {/* ── TAB 4: DELIVERY PARTNER FLEET MANAGEMENT ── */}
       {activeTab === 'DELIVERY' && (
         <div className="space-y-6">
           {/* Header Strip & Sub-navigation */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+          <div className="bg-[#16110E] border border-orange-500/20 rounded-3xl p-6 shadow-2xl space-y-5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-800 pb-5">
               <div>
-                <h3 className="text-lg font-bold text-cyan-400">{t('delivery.title')}</h3>
-                <p className="text-xs text-slate-400">{t('delivery.subtitle')}</p>
+                <h3 className="text-lg font-bold text-orange-400">{t('delivery.title')}</h3>
+                <p className="text-xs text-stone-400">{t('delivery.subtitle')}</p>
               </div>
 
               {/* Delivery Quick KPI Badges */}
               <div className="flex flex-wrap items-center gap-2.5">
-                <div className="px-3.5 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs">
-                  <span className="text-slate-400 text-[11px] block">{t('delivery.activePartners')}</span>
+                <div className="px-3.5 py-1.5 bg-[#0E0B09] border border-stone-800 rounded-xl text-xs">
+                  <span className="text-stone-400 text-[11px] block">{t('delivery.activePartners')}</span>
                   <span className="font-bold text-white">{partners.filter(p => p.status !== 'OFFLINE').length} / {partners.length}</span>
                 </div>
-                <div className="px-3.5 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs">
-                  <span className="text-slate-400 text-[11px] block">{t('delivery.fleetRating')}</span>
-                  <span className="font-bold text-emerald-400">4.88 / 5.0</span>
+                <div className="px-3.5 py-1.5 bg-[#0E0B09] border border-stone-800 rounded-xl text-xs">
+                  <span className="text-stone-400 text-[11px] block">{t('delivery.fleetRating')}</span>
+                  <span className="font-bold text-amber-400">4.88 / 5.0</span>
                 </div>
-                <div className="px-3.5 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs">
-                  <span className="text-slate-400 text-[11px] block">{t('delivery.onTimeRate')}</span>
-                  <span className="font-bold text-cyan-400">96.4%</span>
+                <div className="px-3.5 py-1.5 bg-[#0E0B09] border border-stone-800 rounded-xl text-xs">
+                  <span className="text-stone-400 text-[11px] block">{t('delivery.onTimeRate')}</span>
+                  <span className="font-bold text-orange-400">96.4%</span>
                 </div>
               </div>
             </div>
@@ -1190,8 +1190,8 @@ export default function AdminDashboard() {
                 onClick={() => setDeliverySubTab('PROFILES')}
                 className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   deliverySubTab === 'PROFILES'
-                    ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-md'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 font-bold shadow-md shadow-orange-500/20'
+                    : 'bg-[#0E0B09] text-stone-400 hover:text-white border border-stone-800'
                 }`}
               >
                 {t('delivery.subTab.profiles')} ({partners.length})
@@ -1201,8 +1201,8 @@ export default function AdminDashboard() {
                 onClick={() => setDeliverySubTab('ORDERS')}
                 className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   deliverySubTab === 'ORDERS'
-                    ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-md'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 font-bold shadow-md shadow-orange-500/20'
+                    : 'bg-[#0E0B09] text-stone-400 hover:text-white border border-stone-800'
                 }`}
               >
                 {t('delivery.subTab.orders')} ({assignments.length})
@@ -1212,8 +1212,8 @@ export default function AdminDashboard() {
                 onClick={() => setDeliverySubTab('PICKUP')}
                 className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   deliverySubTab === 'PICKUP'
-                    ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-md'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 font-bold shadow-md shadow-orange-500/20'
+                    : 'bg-[#0E0B09] text-stone-400 hover:text-white border border-stone-800'
                 }`}
               >
                 {t('delivery.subTab.pickup')} ({assignments.filter(a => a.pickupStatus !== 'AT_HUB').length})
@@ -1223,8 +1223,8 @@ export default function AdminDashboard() {
                 onClick={() => setDeliverySubTab('FEEDBACK')}
                 className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   deliverySubTab === 'FEEDBACK'
-                    ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-md'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 font-bold shadow-md shadow-orange-500/20'
+                    : 'bg-[#0E0B09] text-stone-400 hover:text-white border border-stone-800'
                 }`}
               >
                 {t('delivery.subTab.feedback')} ({feedbacks.length})
@@ -1238,14 +1238,14 @@ export default function AdminDashboard() {
               {partners.map(p => (
                 <div
                   key={p.id}
-                  className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4 hover:border-cyan-500/40 transition-all group"
+                  className="bg-[#16110E] border border-orange-500/15 rounded-3xl p-6 shadow-xl space-y-4 hover:border-orange-500/40 transition-all group"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <img
                         src={p.photo}
                         alt={p.name}
-                        className="w-16 h-16 rounded-2xl object-cover border-2 border-slate-700 shadow-md group-hover:border-cyan-500/60 transition-colors"
+                        className="w-16 h-16 rounded-2xl object-cover border-2 border-stone-700 shadow-md group-hover:border-orange-500/60 transition-colors"
                       />
                       <div>
                         <div className="font-bold text-white text-base flex items-center gap-2">
@@ -1254,14 +1254,14 @@ export default function AdminDashboard() {
                             p.status === 'ACTIVE'
                               ? 'bg-emerald-950/50 text-emerald-400 border-emerald-500/30'
                               : p.status === 'ON_DELIVERY'
-                              ? 'bg-cyan-950/50 text-cyan-400 border-cyan-500/30'
-                              : 'bg-slate-950 text-slate-400 border-slate-700'
+                              ? 'bg-orange-950/50 text-orange-400 border-orange-500/30'
+                              : 'bg-stone-950 text-stone-400 border-stone-700'
                           }`}>
                             {p.status.replace('_', ' ')}
                           </span>
                         </div>
-                        <div className="text-xs text-slate-400 font-medium mt-0.5">{p.zone}</div>
-                        <div className="text-[11px] text-cyan-300 font-semibold mt-1">
+                        <div className="text-xs text-stone-400 font-medium mt-0.5">{p.zone}</div>
+                        <div className="text-[11px] text-orange-300 font-semibold mt-1">
                           Rating: {p.rating} / 5.0 · {p.deliveriesCompleted} Deliveries Done
                         </div>
                       </div>
@@ -1269,31 +1269,31 @@ export default function AdminDashboard() {
 
                     <button
                       onClick={() => handleOpenEditPartner(p)}
-                      className="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                      className="px-3 py-1.5 bg-orange-500/15 hover:bg-orange-500/25 text-orange-300 border border-orange-500/30 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                     >
                       {t('delivery.editProfile')}
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-800 text-xs">
-                    <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800/80">
-                      <span className="text-slate-400 text-[10px] uppercase font-bold block">Phone</span>
-                      <span className="text-slate-200 font-semibold">{p.phone}</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-stone-800 text-xs">
+                    <div className="p-2.5 bg-[#0E0B09] rounded-xl border border-stone-800/80">
+                      <span className="text-stone-400 text-[10px] uppercase font-bold block">Phone</span>
+                      <span className="text-stone-200 font-semibold">{p.phone}</span>
                     </div>
-                    <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800/80">
-                      <span className="text-slate-400 text-[10px] uppercase font-bold block">Email</span>
-                      <span className="text-slate-200 font-semibold truncate block">{p.email}</span>
+                    <div className="p-2.5 bg-[#0E0B09] rounded-xl border border-stone-800/80">
+                      <span className="text-stone-400 text-[10px] uppercase font-bold block">Email</span>
+                      <span className="text-stone-200 font-semibold truncate block">{p.email}</span>
                     </div>
-                    <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800/80 sm:col-span-2">
-                      <span className="text-slate-400 text-[10px] uppercase font-bold block">Address / Base Hub</span>
-                      <span className="text-slate-300 font-normal leading-relaxed">{p.address}</span>
+                    <div className="p-2.5 bg-[#0E0B09] rounded-xl border border-stone-800/80 sm:col-span-2">
+                      <span className="text-stone-400 text-[10px] uppercase font-bold block">Address / Base Hub</span>
+                      <span className="text-stone-300 font-normal leading-relaxed">{p.address}</span>
                     </div>
-                    <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800/80 sm:col-span-2 flex items-center justify-between">
+                    <div className="p-2.5 bg-[#0E0B09] rounded-xl border border-stone-800/80 sm:col-span-2 flex items-center justify-between">
                       <div>
-                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Vehicle Details</span>
-                        <span className="text-slate-200 font-semibold">{p.vehicleType}</span>
+                        <span className="text-stone-400 text-[10px] uppercase font-bold block">Vehicle Details</span>
+                        <span className="text-stone-200 font-semibold">{p.vehicleType}</span>
                       </div>
-                      <span className="font-mono text-cyan-400 font-bold">{p.vehicleNumber}</span>
+                      <span className="font-mono text-orange-400 font-bold">{p.vehicleNumber}</span>
                     </div>
                   </div>
                 </div>
@@ -1303,15 +1303,15 @@ export default function AdminDashboard() {
 
           {/* 2. ORDER STATUS (ASSIGNED DELIVERIES) */}
           {deliverySubTab === 'ORDERS' && (
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
-              <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
-                <h3 className="text-base font-bold text-cyan-400">Active Delivery Assignments & Stage</h3>
-                <span className="text-xs text-slate-400">{assignments.length} Deliveries Tracked</span>
+            <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="p-5 border-b border-stone-800 flex items-center justify-between bg-[#0E0B09]/80">
+                <h3 className="text-base font-bold text-orange-400">Active Delivery Assignments & Stage</h3>
+                <span className="text-xs text-stone-400">{assignments.length} Deliveries Tracked</span>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-950 text-slate-400 uppercase font-bold tracking-wider border-b border-slate-800">
+                  <thead className="bg-[#0E0B09] text-stone-400 uppercase font-bold tracking-wider border-b border-stone-800">
                     <tr>
                       <th className="p-4">Order ID & Total</th>
                       <th className="p-4">Customer & Address</th>
@@ -1321,20 +1321,20 @@ export default function AdminDashboard() {
                       <th className="p-4">ETA</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/80 text-slate-200">
+                  <tbody className="divide-y divide-stone-800/80 text-stone-200">
                     {assignments.map(a => (
-                      <tr key={a.orderId} className="hover:bg-slate-800/40 transition-colors">
+                      <tr key={a.orderId} className="hover:bg-[#1E1713] transition-colors">
                         <td className="p-4 space-y-1">
-                          <div className="font-mono font-bold text-cyan-400">{a.orderNumber}</div>
+                          <div className="font-mono font-bold text-orange-400">{a.orderNumber}</div>
                           <div className="font-bold text-white text-sm">₹{a.orderTotal}</div>
-                          <div className="text-[11px] text-slate-400 truncate max-w-[180px]">{a.itemsSummary}</div>
+                          <div className="text-[11px] text-stone-400 truncate max-w-[180px]">{a.itemsSummary}</div>
                         </td>
                         <td className="p-4 space-y-0.5">
                           <div className="font-bold text-white">{a.customerName}</div>
-                          <div className="text-slate-400 text-[11px]">{a.customerPhone}</div>
-                          <div className="text-slate-400 text-[11px] max-w-[220px] truncate">{a.customerAddress}</div>
+                          <div className="text-stone-400 text-[11px]">{a.customerPhone}</div>
+                          <div className="text-stone-400 text-[11px] max-w-[220px] truncate">{a.customerAddress}</div>
                         </td>
-                        <td className="p-4 font-bold text-slate-200">
+                        <td className="p-4 font-bold text-stone-200">
                           <div className="flex items-center gap-2">
                             <span>{a.partnerName}</span>
                           </div>
@@ -1344,7 +1344,7 @@ export default function AdminDashboard() {
                             a.pickupStatus === 'PICKED_UP'
                               ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/30'
                               : a.pickupStatus === 'AT_HUB'
-                              ? 'bg-sky-950/40 text-sky-400 border-sky-500/30'
+                              ? 'bg-orange-950/40 text-orange-400 border-orange-500/30'
                               : 'bg-amber-950/40 text-amber-400 border-amber-500/30'
                           }`}>
                             {a.pickupStatus.replace('_', ' ')}
@@ -1354,14 +1354,14 @@ export default function AdminDashboard() {
                           <select
                             value={a.deliveryStatus}
                             onChange={(e) => handleAssignmentDeliveryStatusChange(a.orderId, e.target.value)}
-                            className="bg-slate-950 border border-cyan-500/30 text-xs font-bold text-cyan-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
+                            className="bg-[#0E0B09] border border-orange-500/30 text-xs font-bold text-orange-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-orange-500 cursor-pointer"
                           >
                             <option value="ASSIGNED">ASSIGNED</option>
                             <option value="OUT_FOR_DELIVERY">OUT FOR DELIVERY</option>
                             <option value="DELIVERED">DELIVERED</option>
                           </select>
                         </td>
-                        <td className="p-4 font-mono font-bold text-slate-300">
+                        <td className="p-4 font-mono font-bold text-stone-300">
                           {a.deliveryStatus === 'DELIVERED' ? 'Completed' : `${a.etaMinutes} mins`}
                         </td>
                       </tr>
@@ -1374,45 +1374,45 @@ export default function AdminDashboard() {
 
           {/* 3. PICKUP STATUS */}
           {deliverySubTab === 'PICKUP' && (
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
-              <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+            <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="p-5 border-b border-stone-800 flex items-center justify-between bg-[#0E0B09]/80">
                 <div>
-                  <h3 className="text-base font-bold text-cyan-400">Harbour Hub & Store Pickup Status</h3>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Verification of packaging handover from dock/hub to courier</p>
+                  <h3 className="text-base font-bold text-orange-400">Harbour Hub & Store Pickup Status</h3>
+                  <p className="text-[11px] text-stone-400 mt-0.5">Verification of packaging handover from dock/hub to courier</p>
                 </div>
               </div>
 
-              <div className="divide-y divide-slate-800">
+              <div className="divide-y divide-stone-800">
                 {assignments.map(a => (
-                  <div key={a.orderId} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-800/30 transition-colors">
+                  <div key={a.orderId} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#1E1713] transition-colors">
                     <div className="space-y-1">
                       <div className="flex items-center gap-3">
-                        <span className="font-mono font-bold text-cyan-400 text-sm">{a.orderNumber}</span>
+                        <span className="font-mono font-bold text-orange-400 text-sm">{a.orderNumber}</span>
                         <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                           a.pickupStatus === 'PICKED_UP'
                             ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/30'
                             : a.pickupStatus === 'AT_HUB'
-                            ? 'bg-sky-950/40 text-sky-400 border-sky-500/30'
+                            ? 'bg-orange-950/40 text-orange-400 border-orange-500/30'
                             : 'bg-amber-950/40 text-amber-400 border-amber-500/30'
                         }`}>
                           {a.pickupStatus.replace('_', ' ')}
                         </span>
                       </div>
                       <div className="text-xs text-white font-semibold">
-                        Assigned Courier: <span className="text-cyan-300">{a.partnerName}</span>
+                        Assigned Courier: <span className="text-orange-300">{a.partnerName}</span>
                       </div>
-                      <div className="text-[11px] text-slate-400">
+                      <div className="text-[11px] text-stone-400">
                         {a.itemsSummary} · ₹{a.orderTotal}
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div className="text-right text-[11px] text-slate-500">
+                      <div className="text-right text-[11px] text-stone-500">
                         Updated {a.updatedAt}
                       </div>
                       <button
                         onClick={() => handleTogglePickupStatus(a.orderId)}
-                        className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-sky-600 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:from-cyan-400 hover:to-sky-500 shadow-md shadow-cyan-500/20 cursor-pointer"
+                        className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 rounded-xl text-xs font-bold uppercase tracking-wider hover:from-orange-400 hover:to-amber-400 shadow-md shadow-orange-500/20 cursor-pointer"
                       >
                         Toggle Pickup Stage
                       </button>
@@ -1428,7 +1428,7 @@ export default function AdminDashboard() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {feedbacks.map(f => (
-                  <div key={f.id} className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-3">
+                  <div key={f.id} className="bg-[#16110E] border border-orange-500/15 rounded-3xl p-5 shadow-xl space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="font-bold text-white text-sm">{f.customerName}</div>
                       <span className="font-bold text-amber-400 text-xs bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
@@ -1436,24 +1436,24 @@ export default function AdminDashboard() {
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-300 font-normal italic leading-relaxed bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+                    <p className="text-xs text-stone-300 font-normal italic leading-relaxed bg-[#0E0B09] p-3 rounded-xl border border-stone-800/80">
                       "{f.comment}"
                     </p>
 
-                    <div className="pt-2 border-t border-slate-800 text-[11px] space-y-1">
-                      <div className="flex justify-between text-slate-400">
+                    <div className="pt-2 border-t border-stone-800 text-[11px] space-y-1">
+                      <div className="flex justify-between text-stone-400">
                         <span>Partner:</span>
-                        <span className="text-cyan-300 font-semibold">{f.partnerName}</span>
+                        <span className="text-orange-300 font-semibold">{f.partnerName}</span>
                       </div>
-                      <div className="flex justify-between text-slate-400">
+                      <div className="flex justify-between text-stone-400">
                         <span>Delivery Speed:</span>
                         <span className="text-emerald-400 font-semibold">{f.deliverySpeed}</span>
                       </div>
-                      <div className="flex justify-between text-slate-400">
+                      <div className="flex justify-between text-stone-400">
                         <span>Hygiene & Condition:</span>
-                        <span className="text-sky-400 font-semibold">{f.hygieneCondition}</span>
+                        <span className="text-amber-400 font-semibold">{f.hygieneCondition}</span>
                       </div>
-                      <div className="flex justify-between text-slate-500 pt-1 text-[10px]">
+                      <div className="flex justify-between text-stone-500 pt-1 text-[10px]">
                         <span>Order #{f.orderNumber}</span>
                         <span>{f.date}</span>
                       </div>
@@ -1468,13 +1468,13 @@ export default function AdminDashboard() {
 
       {/* ── TAB 5: MAPS ── */}
       {activeTab === 'MAPS' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
+        <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl p-6 shadow-2xl space-y-6">
           <div>
-            <h3 className="text-base font-bold text-cyan-400">Google Maps Central Fulfillment Hub</h3>
-            <p className="text-xs text-slate-400">Fulfillment dock coordinates and dispatch radial zone</p>
+            <h3 className="text-base font-bold text-orange-400">Google Maps Central Fulfillment Hub</h3>
+            <p className="text-xs text-stone-400">Fulfillment dock coordinates and dispatch radial zone</p>
           </div>
 
-          <div className="h-72 rounded-2xl overflow-hidden border border-slate-800 relative bg-slate-950">
+          <div className="h-72 rounded-2xl overflow-hidden border border-stone-800 relative bg-[#0E0B09]">
             <iframe
               title="Google Maps Admin Fulfillment Hub"
               src={`https://maps.google.com/maps?q=${hubLocation.lat},${hubLocation.lng}&z=13&output=embed`}
@@ -1483,13 +1483,13 @@ export default function AdminDashboard() {
             ></iframe>
           </div>
 
-          <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-300">
+          <div className="p-4 bg-[#0E0B09] border border-stone-800 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-stone-300">
             <div>
               Active Base Hub: <strong className="text-white">{hubLocation.area}, {hubLocation.city}</strong> ({hubLocation.lat.toFixed(4)}, {hubLocation.lng.toFixed(4)})
             </div>
             <button
               onClick={() => setHubLocation({ lat: 13.0827, lng: 80.2707, area: 'Central Hub Chennai', city: 'Chennai' })}
-              className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-sky-600 text-white rounded-xl font-bold uppercase text-[10px] tracking-wider cursor-pointer"
+              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 rounded-xl font-bold uppercase text-[10px] tracking-wider cursor-pointer hover:from-orange-400 hover:to-amber-400"
             >
               Reset to Central Hub
             </button>
@@ -1499,16 +1499,16 @@ export default function AdminDashboard() {
 
       {/* ── EDIT DELIVERY PARTNER PROFILE MODAL ── */}
       {editingPartner && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-          <div className="bg-slate-900 border border-cyan-500/40 rounded-3xl p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl text-white">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0E0B09]/80 backdrop-blur-md animate-fade-in">
+          <div className="bg-[#16110E] border border-orange-500/30 rounded-3xl p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl text-stone-100">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-800">
               <div>
-                <h3 className="text-base font-bold text-cyan-400">{t('modal.editPartner')}</h3>
-                <p className="text-xs text-slate-400">Update profile details, contact info, and base location</p>
+                <h3 className="text-base font-bold text-orange-400">{t('modal.editPartner')}</h3>
+                <p className="text-xs text-stone-400">Update profile details, contact info, and base location</p>
               </div>
               <button
                 onClick={() => setEditingPartner(null)}
-                className="text-slate-400 hover:text-white font-bold cursor-pointer"
+                className="text-stone-400 hover:text-white font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -1516,89 +1516,89 @@ export default function AdminDashboard() {
 
             <form onSubmit={handleSavePartnerProfile} className="space-y-4 text-xs font-medium">
               {/* Picture Live Preview */}
-              <div className="flex items-center gap-4 bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+              <div className="flex items-center gap-4 bg-[#0E0B09] p-3.5 rounded-2xl border border-stone-800">
                 <img
                   src={partnerFormData.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
                   alt="Partner Preview"
-                  className="w-16 h-16 rounded-2xl object-cover border-2 border-cyan-500/50 shadow-md"
+                  className="w-16 h-16 rounded-2xl object-cover border-2 border-orange-500/50 shadow-md"
                 />
                 <div className="space-y-1 flex-1">
-                  <label className="text-slate-300 text-[11px] font-bold block">{t('modal.photo')}</label>
+                  <label className="text-stone-300 text-[11px] font-bold block">{t('modal.photo')}</label>
                   <input
                     type="text"
                     required
                     value={partnerFormData.photo || ''}
                     onChange={e => setPartnerFormData({ ...partnerFormData, photo: e.target.value })}
                     placeholder="https://..."
-                    className="w-full p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 text-xs"
+                    className="w-full p-2.5 bg-[#16110E] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500 text-xs"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">{t('modal.name')}</label>
+                  <label className="text-stone-300 font-bold">{t('modal.name')}</label>
                   <input
                     type="text"
                     required
                     value={partnerFormData.name || ''}
                     onChange={e => setPartnerFormData({ ...partnerFormData, name: e.target.value })}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">{t('modal.phone')}</label>
+                  <label className="text-stone-300 font-bold">{t('modal.phone')}</label>
                   <input
                     type="text"
                     required
                     value={partnerFormData.phone || ''}
                     onChange={e => setPartnerFormData({ ...partnerFormData, phone: e.target.value })}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-slate-300 font-bold">{t('modal.email')}</label>
+                  <label className="text-stone-300 font-bold">{t('modal.email')}</label>
                   <input
                     type="email"
                     required
                     value={partnerFormData.email || ''}
                     onChange={e => setPartnerFormData({ ...partnerFormData, email: e.target.value })}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-slate-300 font-bold">{t('modal.address')}</label>
+                  <label className="text-stone-300 font-bold">{t('modal.address')}</label>
                   <textarea
                     rows={2}
                     required
                     value={partnerFormData.address || ''}
                     onChange={e => setPartnerFormData({ ...partnerFormData, address: e.target.value })}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   ></textarea>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">{t('modal.zone')}</label>
+                  <label className="text-stone-300 font-bold">{t('modal.zone')}</label>
                   <input
                     type="text"
                     required
                     value={partnerFormData.zone || ''}
                     onChange={e => setPartnerFormData({ ...partnerFormData, zone: e.target.value })}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Vehicle Reg Number</label>
+                  <label className="text-stone-300 font-bold">Vehicle Reg Number</label>
                   <input
                     type="text"
                     required
                     value={partnerFormData.vehicleNumber || ''}
                     onChange={e => setPartnerFormData({ ...partnerFormData, vehicleNumber: e.target.value })}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 font-mono"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500 font-mono"
                   />
                 </div>
               </div>
@@ -1606,14 +1606,14 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 py-3.5 bg-gradient-to-r from-cyan-500 to-sky-600 hover:from-cyan-400 hover:to-sky-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer"
+                  className="flex-1 py-3.5 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-400 hover:via-amber-400 hover:to-orange-400 text-stone-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer"
                 >
                   {t('modal.save')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditingPartner(null)}
-                  className="px-5 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer"
+                  className="px-5 py-3.5 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer"
                 >
                   {t('modal.cancel')}
                 </button>
@@ -1625,33 +1625,33 @@ export default function AdminDashboard() {
 
       {/* ── ADD / EDIT PRODUCT MODAL ── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-          <div className="bg-slate-900 border border-cyan-500/40 rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl text-white">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-base font-bold text-cyan-400">{editingId ? 'Edit Product Details' : 'Add New Seafood Product'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white font-bold cursor-pointer">✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0E0B09]/80 backdrop-blur-md animate-fade-in">
+          <div className="bg-[#16110E] border border-orange-500/30 rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl text-stone-100">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-800">
+              <h3 className="text-base font-bold text-orange-400">{editingId ? 'Edit Product Details' : 'Add New Seafood Product'}</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-stone-400 hover:text-white font-bold cursor-pointer">✕</button>
             </div>
 
             <form onSubmit={handleSaveProduct} className="space-y-4 text-xs font-medium">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-slate-300">Product Name</label>
+                  <label className="text-stone-300">Product Name</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Atlantic Salmon Steaks"
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300">Category</label>
+                  <label className="text-stone-300">Category</label>
                   <select
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 cursor-pointer"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500 cursor-pointer"
                   >
                     {['Sea Fish', 'Freshwater Fish', 'Prawns & Shrimps', 'Crabs & Shellfish', 'Ready to Cook', 'Combo Packs'].map(c => (
                       <option key={c} value={c}>{c}</option>
@@ -1660,75 +1660,75 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300">Price (₹)</label>
+                  <label className="text-stone-300">Price (₹)</label>
                   <input
                     type="number"
                     required
                     value={formData.price}
                     onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300">Initial Stock (Pcs)</label>
+                  <label className="text-stone-300">Initial Stock (Pcs)</label>
                   <input
                     type="number"
                     required
                     value={formData.stock}
                     onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300">Badge Tag</label>
+                  <label className="text-stone-300">Badge Tag</label>
                   <input
                     type="text"
                     value={formData.badge}
                     onChange={e => setFormData({ ...formData, badge: e.target.value })}
                     placeholder="e.g. Bestseller, Fresh Catch"
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-slate-300">Image Picture URL</label>
+                  <label className="text-stone-300">Image Picture URL</label>
                   <input
                     type="text"
                     required
                     value={formData.imageUrl}
                     onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
                     placeholder="https://images.unsplash.com/..."
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-slate-300">Description</label>
+                  <label className="text-stone-300">Description</label>
                   <textarea
                     rows={2}
                     value={formData.description}
                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   ></textarea>
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-slate-300">Cutting Options (Comma separated)</label>
+                  <label className="text-stone-300">Cutting Options (Comma separated)</label>
                   <input
                     type="text"
                     value={formData.cuts}
                     onChange={e => setFormData({ ...formData, cuts: e.target.value })}
                     placeholder="Steak Cut, Curry Cut, Boneless Cubes"
-                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-sky-600 hover:from-cyan-400 hover:to-sky-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer"
+                className="w-full py-3.5 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-400 hover:via-amber-400 hover:to-orange-400 text-stone-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer"
               >
                 Save Product to Catalog
               </button>

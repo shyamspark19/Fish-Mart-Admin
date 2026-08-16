@@ -52,12 +52,12 @@ function AdminFooter() {
   // Only show the shared footer on admin/login pages, not on landing (which has its own)
   if (!auth?.user) return null
   return (
-    <footer className="bg-slate-900 border-t border-cyan-500/20 py-6 px-4 text-center text-xs text-slate-400">
+    <footer className="bg-[#120E0B] border-t border-orange-500/20 py-6 px-4 text-center text-xs text-stone-400">
       <div className="max-w-6xl mx-auto space-y-2">
-        <div className="flex items-center justify-center gap-2 text-sm font-bold text-cyan-400">
+        <div className="flex items-center justify-center gap-2 text-sm font-bold text-orange-400">
           <span>{t('brand.title')} — {t('brand.adminPortal')}</span>
         </div>
-        <div className="text-[11px] text-slate-500">
+        <div className="text-[11px] text-stone-500">
           © 2026 Fish Mart Inc. All rights reserved. {t('admin.restricted')}.
         </div>
       </div>
@@ -69,7 +69,7 @@ export default function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <div className="min-h-screen bg-[#050D1A] text-slate-100 font-sans flex flex-col">
+        <div className="min-h-screen bg-[#0E0B09] text-stone-100 font-sans flex flex-col">
           <Navbar />
           <main className="flex-1">
             <AppRoutes />

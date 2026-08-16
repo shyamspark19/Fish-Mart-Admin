@@ -26,15 +26,15 @@ export default function Navbar() {
   // Minimal clean header for Login page
   if (isAuthPage) {
     return (
-      <header className="bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 border-b border-cyan-500/20 shadow-xl text-white font-sans py-3.5 px-6">
+      <header className="bg-[#140F0D]/95 backdrop-blur-md sticky top-0 z-30 border-b border-orange-500/20 shadow-xl text-stone-100 font-sans py-3.5 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link to="/">
             <BrandLogo size="md" />
           </Link>
           <div className="flex items-center gap-3">
             <LanguageSelector />
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-cyan-400">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-orange-500/10 border border-orange-500/30 rounded-full">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-orange-400">
                 {t('brand.adminPortal')}
               </span>
             </div>
@@ -46,15 +46,15 @@ export default function Navbar() {
 
   // Full admin header
   return (
-    <header className="bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 border-b border-cyan-500/20 shadow-xl text-white font-sans">
+    <header className="bg-[#140F0D]/95 backdrop-blur-md sticky top-0 z-30 border-b border-orange-500/20 shadow-xl text-stone-100 font-sans">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <div className="flex items-center gap-4">
           <Link to="/admin">
             <BrandLogo size="md" />
           </Link>
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-cyan-400">
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-orange-500/10 border border-orange-500/30 rounded-full">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-orange-400">
               {t('brand.adminPortal')}
             </span>
           </div>
@@ -68,7 +68,7 @@ export default function Navbar() {
           {/* Admin Hub Link */}
           <Link
             to="/admin"
-            className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-500 to-sky-600 hover:from-cyan-600 hover:to-sky-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-md shadow-cyan-500/20 transition-transform active:scale-95 flex items-center gap-1.5"
+            className="px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-stone-950 font-bold rounded-xl text-xs uppercase tracking-wider shadow-md shadow-orange-500/20 transition-transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
           >
             <span>{t('admin.dashboard')}</span>
           </Link>
@@ -76,12 +76,12 @@ export default function Navbar() {
           {/* User Info & Logout */}
           {isLoggedIn ? (
             <div className="flex items-center gap-2">
-              <span className="hidden lg:inline text-xs font-bold bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-cyan-200">
+              <span className="hidden lg:inline text-xs font-semibold bg-[#1F1814] border border-orange-500/20 px-3 py-1.5 rounded-full text-orange-200">
                 {auth?.user?.name || 'Administrator'}
               </span>
               <button
                 onClick={handleLogout}
-                className="text-xs font-bold text-rose-400 hover:text-rose-300 uppercase tracking-wider transition-colors px-2 py-1 rounded-lg hover:bg-rose-500/10"
+                className="text-xs font-bold text-rose-400 hover:text-rose-300 uppercase tracking-wider transition-colors px-2 py-1 rounded-lg hover:bg-rose-500/10 cursor-pointer"
               >
                 {t('logout')}
               </button>
@@ -89,7 +89,7 @@ export default function Navbar() {
           ) : (
             <Link
               to="/login"
-              className="text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-cyan-500 to-sky-600 text-white px-4 py-2 rounded-xl hover:from-cyan-600 hover:to-sky-700 transition-transform active:scale-95 shadow-md shadow-cyan-500/20"
+              className="text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 px-4 py-2 rounded-xl hover:from-orange-400 hover:to-amber-400 transition-transform active:scale-95 shadow-md shadow-orange-500/20 cursor-pointer"
             >
               {t('admin.signIn')}
             </Link>
