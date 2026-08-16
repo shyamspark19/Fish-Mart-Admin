@@ -665,15 +665,73 @@ export default function AdminDashboard() {
     }
   }
 
+  /**
+   * Update Order Status + Automatically deduct stock from Supabase on CONFIRMATION
+   */
   const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       setSuccessMsg('')
       setError('')
+
+      const targetOrder = orders.find(o => o._id === orderId)
+      const previousStatus = targetOrder?.orderStatus || 'PLACED'
+
+      // 1. Update order status in Supabase database
       await updateOrderStatus(orderId, newStatus)
-      setOrders(prev => (Array.isArray(prev) ? prev : []).map(o => o._id === orderId ? { ...o, orderStatus: newStatus } : o))
-      setSuccessMsg(`Order status updated to "${newStatus}" in database.`)
+      setOrders(prev =>
+        (Array.isArray(prev) ? prev : []).map(o =>
+          o._id === orderId ? { ...o, orderStatus: newStatus } : o
+        )
+      )
+
+      // 2. Automatic stock deduction if order is being CONFIRMED for the first time
+      if (newStatus === 'CONFIRMED' && previousStatus !== 'CONFIRMED' && targetOrder && Array.isArray(targetOrder.items)) {
+        const deductedItemsSummary: string[] = []
+
+        for (const item of targetOrder.items) {
+          const qtyToDeduct = Number(item.quantity) || 1
+          // Find matching product by ID or Name
+          const matchedProd = products.find(p =>
+            p._id === item.productId ||
+            p._id === item._id ||
+            p.name.toLowerCase() === (item.name || '').toLowerCase()
+          )
+
+          if (matchedProd) {
+            const updatedStock = Math.max(0, (matchedProd.stock || 0) - qtyToDeduct)
+            // Persist reduced stock directly to Supabase database
+            await updateProductStock(matchedProd._id, updatedStock)
+
+            // Update local products state
+            setProducts(prevProds =>
+              (Array.isArray(prevProds) ? prevProds : []).map(p =>
+                p._id === matchedProd._id
+                  ? {
+                      ...p,
+                      stock: updatedStock,
+                      badge: updatedStock < 10 ? 'Low Stock' : (p.badge === 'Low Stock' ? undefined : p.badge)
+                    }
+                  : p
+              )
+            )
+
+            deductedItemsSummary.push(`${matchedProd.name} (-${qtyToDeduct} → ${updatedStock} Pcs left)`)
+          }
+        }
+
+        if (deductedItemsSummary.length > 0) {
+          setSuccessMsg(
+            `Order #${targetOrder.orderNumber || orderId.slice(0, 8)} confirmed! Automatically deducted inventory from Supabase: ${deductedItemsSummary.join(', ')}`
+          )
+        } else {
+          setSuccessMsg(`Order #${targetOrder.orderNumber || orderId.slice(0, 8)} confirmed in database.`)
+        }
+      } else {
+        setSuccessMsg(`Order status updated to "${newStatus.replace(/_/g, ' ')}" in database.`)
+      }
     } catch (err: any) {
-      setError('Failed to update order status.')
+      console.error('Order status update error:', err)
+      setError('Failed to update order status or deduct inventory.')
     }
   }
 
@@ -1200,33 +1258,16 @@ export default function AdminDashboard() {
                                 </button>
                               </div>
                             ) : (
-                              /* Standard Fast Quick Adjustment Controls */
+                              /* Manual Restocking Controls (+1, +5, +10) and Click to Edit Stock */
                               <div className="flex items-center gap-1.5">
-                                <button
-                                  onClick={() => handleStockAdjust(p, -5)}
-                                  disabled={isSavingThis || p.stock === 0}
-                                  title="Reduce 5 units in database"
-                                  className="px-2 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold text-xs cursor-pointer disabled:opacity-30"
-                                >
-                                  -5
-                                </button>
-                                <button
-                                  onClick={() => handleStockAdjust(p, -1)}
-                                  disabled={isSavingThis || p.stock === 0}
-                                  title="Reduce 1 unit in database"
-                                  className="px-2 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold text-xs cursor-pointer disabled:opacity-30"
-                                >
-                                  -1
-                                </button>
-
-                                {/* Stock Quantity Badge (Clickable to open inline edit) */}
+                                {/* Stock Quantity Badge (Clickable to enter exact restock number) */}
                                 <button
                                   onClick={() => {
                                     setEditingStockId(p._id)
                                     setTempStockValue(p.stock)
                                   }}
-                                  title="Click to type exact stock number"
-                                  className={`font-bold px-2.5 py-1 rounded-lg border text-xs cursor-pointer transition-all hover:scale-105 ${
+                                  title="Click to type exact stock quantity"
+                                  className={`font-bold px-3 py-1.5 rounded-xl border text-xs cursor-pointer transition-all hover:scale-105 shadow-sm ${
                                     isOutOfStock
                                       ? 'bg-rose-950/80 text-rose-300 border-rose-500/50'
                                       : isLowStock
@@ -1237,21 +1278,30 @@ export default function AdminDashboard() {
                                   {isSavingThis ? 'Saving...' : `${p.stock} Pcs`}
                                 </button>
 
+                                {/* Restock Buttons: Manual inventory replenishment */}
                                 <button
                                   onClick={() => handleStockAdjust(p, +1)}
                                   disabled={isSavingThis}
-                                  title="Add 1 unit to database"
-                                  className="px-2 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold text-xs cursor-pointer"
+                                  title="Restock +1 unit in database"
+                                  className="px-2.5 py-1.5 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 hover:border-orange-500/40 rounded-xl text-orange-300 font-bold text-xs cursor-pointer transition-colors"
                                 >
                                   +1
                                 </button>
                                 <button
                                   onClick={() => handleStockAdjust(p, +5)}
                                   disabled={isSavingThis}
-                                  title="Add 5 units to database"
-                                  className="px-2 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold text-xs cursor-pointer"
+                                  title="Restock +5 units in database"
+                                  className="px-2.5 py-1.5 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 hover:border-orange-500/40 rounded-xl text-orange-300 font-bold text-xs cursor-pointer transition-colors"
                                 >
                                   +5
+                                </button>
+                                <button
+                                  onClick={() => handleStockAdjust(p, +10)}
+                                  disabled={isSavingThis}
+                                  title="Restock +10 units in database"
+                                  className="px-2.5 py-1.5 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 hover:border-orange-500/40 rounded-xl text-orange-300 font-bold text-xs cursor-pointer transition-colors"
+                                >
+                                  +10
                                 </button>
                               </div>
                             )}
@@ -1364,11 +1414,20 @@ export default function AdminDashboard() {
                           <span className="text-stone-500">{orderTime}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5">
                         <div className="text-right">
                           <div className="text-base font-extrabold text-white">₹{Number(o.total).toLocaleString()}</div>
                           <div className="text-[10px] text-stone-400 font-medium">{o.paymentMethod} · {totalItems} item{totalItems !== 1 ? 's' : ''}</div>
                         </div>
+                        {o.orderStatus === 'PLACED' && (
+                          <button
+                            onClick={() => handleUpdateOrderStatus(o._id, 'CONFIRMED')}
+                            title="Confirm order and automatically deduct inventory from database"
+                            className="px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-stone-950 font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                          >
+                            ✓ Confirm Order
+                          </button>
+                        )}
                         <select
                           value={o.orderStatus || 'PLACED'}
                           onChange={(e) => handleUpdateOrderStatus(o._id, e.target.value)}
