@@ -9,14 +9,20 @@ export default function Navbar() {
   const routerLocation = useRouterLocation()
 
   const isAuthPage = routerLocation.pathname === '/login'
+  const isLandingPage = routerLocation.pathname === '/'
   const isLoggedIn = Boolean(auth?.user)
+
 
   const handleLogout = () => {
     auth?.logout()
     navigate('/login')
   }
 
+  // Landing page has its own full-page layout — no shared navbar
+  if (isLandingPage) return null
+
   // Minimal clean header for Login page
+
   if (isAuthPage) {
     return (
       <header className="bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 border-b border-amber-500/20 shadow-xl text-white font-sans py-4 px-6">
