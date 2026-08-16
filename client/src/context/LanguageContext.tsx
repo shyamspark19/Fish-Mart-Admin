@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState } from 'react'
 
 export type Language = 'en' | 'ta' | 'hi'
 
@@ -82,6 +82,16 @@ const translations: Record<Language, Record<string, string>> = {
     'stat.avgOrderValue': 'Average Order Value',
     'btn.addNewProduct': 'Add New Product',
     'btn.refresh': 'Refresh Data',
+
+    // Stock & Inventory
+    'stock.lowStock': 'Low Stock',
+    'stock.lowStockAlert': 'Low Stock Alert (<10 pcs)',
+    'stock.outOfStock': 'Out of Stock',
+    'stock.inStock': 'In Stock',
+    'stock.allProducts': 'All Products',
+    'stock.onlyLowStock': 'Only Low Stock (<10)',
+    'stock.updateSuccess': 'Stock updated in Supabase database',
+    'stock.quickAdjust': 'Quick Adjust Stock',
 
     // Delivery Partner Tab
     'delivery.title': 'Delivery Fleet & Logistics Management',
@@ -190,6 +200,16 @@ const translations: Record<Language, Record<string, string>> = {
     'btn.addNewProduct': 'புதிய தயாரிப்பை சேர்',
     'btn.refresh': 'புதுப்பிக்கவும்',
 
+    // Stock & Inventory
+    'stock.lowStock': 'குறைந்த கையிருப்பு',
+    'stock.lowStockAlert': 'குறைந்த கையிருப்பு எச்சரிக்கை (<10)',
+    'stock.outOfStock': 'கையிருப்பு இல்லை',
+    'stock.inStock': 'கையிருப்பில் உள்ளது',
+    'stock.allProducts': 'அனைத்து பொருட்கள்',
+    'stock.onlyLowStock': 'குறைந்த கையிருப்பு மட்டும் (<10)',
+    'stock.updateSuccess': 'தரவுத்தளத்தில் கையிருப்பு புதுப்பிக்கப்பட்டது',
+    'stock.quickAdjust': 'கையிருப்பை மாற்று',
+
     // Delivery Partner Tab
     'delivery.title': 'டெலிவரி & தளவாட மேலாண்மை',
     'delivery.subtitle': 'ஆர்டர் விநியோகம், பிக்கப் நிலை, வாடிக்கையாளர் கருத்துகள் மற்றும் பார்ட்னர் சுயவிவரங்களை நிர்வகிக்கவும்.',
@@ -296,6 +316,16 @@ const translations: Record<Language, Record<string, string>> = {
     'stat.avgOrderValue': 'औसत ऑर्डर मूल्य',
     'btn.addNewProduct': 'नया उत्पाद जोड़ें',
     'btn.refresh': 'डेटा रीफ्रेश करें',
+
+    // Stock & Inventory
+    'stock.lowStock': 'कम स्टॉक',
+    'stock.lowStockAlert': 'कम स्टॉक चेतावनी (<10)',
+    'stock.outOfStock': 'स्टॉक समाप्त',
+    'stock.inStock': 'स्टॉक में उपलब्ध',
+    'stock.allProducts': 'सभी उत्पाद',
+    'stock.onlyLowStock': 'केवल कम स्टॉक (<10)',
+    'stock.updateSuccess': 'डेटाबेस में स्टॉक अपडेट किया गया',
+    'stock.quickAdjust': 'स्टॉक समायोजित करें',
 
     // Delivery Partner Tab
     'delivery.title': 'डिलीवरी फ्लीट एवं लॉजिस्टिक्स प्रबंधन',

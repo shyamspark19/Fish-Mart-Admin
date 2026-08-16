@@ -187,6 +187,13 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'ANALYTICS' | 'PRODUCTS' | 'ORDERS' | 'MAPS' | 'DELIVERY'>('ANALYTICS')
   const [deliverySubTab, setDeliverySubTab] = useState<'PROFILES' | 'ORDERS' | 'PICKUP' | 'FEEDBACK'>('PROFILES')
 
+  // Stock Filter State (All vs Only Low Stock <10)
+  const [stockFilter, setStockFilter] = useState<'ALL' | 'LOW_STOCK'>('ALL')
+  // Inline Stock Edit State map
+  const [editingStockId, setEditingStockId] = useState<string | null>(null)
+  const [tempStockValue, setTempStockValue] = useState<number>(0)
+  const [stockUpdatingId, setStockUpdatingId] = useState<string | null>(null)
+
   const [products, setProducts] = useState<Product[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -281,7 +288,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData()
 
-    // Supabase Real-Time Subscription
+    // ── Supabase Real-Time Subscriptions for Orders & Products ──
     const channel = supabase
       .channel('admin-realtime')
       .on(
@@ -324,6 +331,25 @@ export default function AdminDashboard() {
           )
         }
       )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'products' },
+        (payload) => {
+          const updated = payload.new as any
+          setProducts(prev =>
+            (Array.isArray(prev) ? prev : []).map(p =>
+              p._id === updated.id
+                ? {
+                    ...p,
+                    stock: updated.stock,
+                    badge: updated.badge || (updated.stock < 10 ? 'Low Stock' : p.badge),
+                    name: updated.name || p.name
+                  }
+                : p
+            )
+          )
+        }
+      )
       .subscribe()
 
     return () => {
@@ -353,7 +379,7 @@ export default function AdminDashboard() {
           weights: p.weights || [],
           cuttingOptions: p.cuttingOptions || p.cutting_options || [],
           stock: p.stock ?? 50,
-          badge: p.badge,
+          badge: p.badge || (p.stock < 10 ? 'Low Stock' : undefined),
           netWeight: p.netWeight || p.net_weight,
           grossWeight: p.grossWeight || p.gross_weight,
           pieces: p.pieces,
@@ -407,6 +433,12 @@ export default function AdminDashboard() {
   const safeProducts = Array.isArray(products) ? products : []
   const safeOrders = Array.isArray(orders) ? orders : []
 
+  // Filtered products according to stock filter
+  const lowStockCount = safeProducts.filter(p => p.stock < 10).length
+  const displayedProducts = stockFilter === 'LOW_STOCK'
+    ? safeProducts.filter(p => p.stock < 10)
+    : safeProducts
+
   const totalRevenue = safeOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0)
   const totalOrdersCount = safeOrders.length
   const totalStockCount = safeProducts.reduce((acc, p) => acc + (Number(p.stock) || 0), 0)
@@ -424,14 +456,13 @@ export default function AdminDashboard() {
     return acc
   }, {})
 
-  // Sunset palette for category distribution
   const categoryColors: { [key: string]: string } = {
-    'Sea Fish': '#FB923C',        // Sunset Orange
-    'Freshwater Fish': '#F59E0B',  // Warm Amber
-    'Prawns & Shrimps': '#F97316', // Deep Orange
-    'Crabs & Shellfish': '#FB7185',// Sunset Rose
-    'Ready to Cook': '#FBBF24',    // Golden Amber
-    'Combo Packs': '#EA580C'       // Burnt Orange
+    'Sea Fish': '#FB923C',
+    'Freshwater Fish': '#F59E0B',
+    'Prawns & Shrimps': '#F97316',
+    'Crabs & Shellfish': '#FB7185',
+    'Ready to Cook': '#FBBF24',
+    'Combo Packs': '#EA580C'
   }
 
   let accumulatedPercent = 0
@@ -492,7 +523,7 @@ export default function AdminDashboard() {
       price: p.weights?.[0]?.price || 399,
       weightLabel: p.weights?.[0]?.label || '300g',
       stock: p.stock || 0,
-      badge: p.badge || '',
+      badge: p.badge || (p.stock < 10 ? 'Low Stock' : ''),
       netWeight: p.netWeight || '300g',
       grossWeight: p.grossWeight || '450g',
       pieces: p.pieces || '4-6 Pcs',
@@ -505,6 +536,7 @@ export default function AdminDashboard() {
     e.preventDefault()
     setSuccessMsg('')
     setError('')
+    const stockVal = Number(formData.stock) || 0
     const payload = {
       name: formData.name,
       description: formData.description,
@@ -512,8 +544,8 @@ export default function AdminDashboard() {
       images: [formData.imageUrl],
       weights: [{ label: formData.weightLabel, price: Number(formData.price) }],
       cuttingOptions: formData.cuts.split(',').map(c => c.trim()).filter(Boolean),
-      stock: Number(formData.stock),
-      badge: formData.badge,
+      stock: stockVal,
+      badge: formData.badge || (stockVal < 10 ? 'Low Stock' : null),
       netWeight: formData.netWeight,
       grossWeight: formData.grossWeight,
       pieces: formData.pieces,
@@ -524,10 +556,10 @@ export default function AdminDashboard() {
     try {
       if (editingId) {
         await editAdminProduct(editingId, payload)
-        setSuccessMsg(`Product "${formData.name}" updated successfully!`)
+        setSuccessMsg(`Product "${formData.name}" updated in Supabase database! (Stock: ${stockVal} Pcs)`)
       } else {
         const newProduct = await createAdminProduct(payload)
-        setSuccessMsg(`Product "${formData.name}" created successfully!`)
+        setSuccessMsg(`Product "${formData.name}" added to Supabase database! (Stock: ${stockVal} Pcs)`)
         if (newProduct) {
           const mappedNewProd: Product = {
             _id: newProduct.id || newProduct._id || `prod_${Date.now()}`,
@@ -537,8 +569,8 @@ export default function AdminDashboard() {
             images: newProduct.images || [formData.imageUrl],
             weights: newProduct.weights || [{ label: formData.weightLabel, price: Number(formData.price) }],
             cuttingOptions: newProduct.cutting_options || payload.cuttingOptions,
-            stock: newProduct.stock ?? Number(formData.stock),
-            badge: newProduct.badge || formData.badge,
+            stock: stockVal,
+            badge: newProduct.badge || (stockVal < 10 ? 'Low Stock' : formData.badge),
             netWeight: newProduct.net_weight || formData.netWeight,
             grossWeight: newProduct.gross_weight || formData.grossWeight,
             pieces: newProduct.pieces || formData.pieces,
@@ -551,34 +583,85 @@ export default function AdminDashboard() {
       fetchData()
     } catch (err: any) {
       console.error(err)
-      setError(err?.message || err?.response?.data?.message || 'Failed to save product.')
+      setError(err?.message || err?.response?.data?.message || 'Failed to save product in database.')
     }
   }
 
   const handleDeleteProduct = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete "${name}"?`)) return
+    if (!window.confirm(`Are you sure you want to delete "${name}" from the database?`)) return
     try {
       setSuccessMsg('')
       setError('')
       await deleteAdminProduct(id)
-      setSuccessMsg(`Product "${name}" deleted.`)
+      setSuccessMsg(`Product "${name}" deleted from database.`)
       fetchData()
     } catch (err: any) {
       setError(err?.message || 'Failed to delete product.')
     }
   }
 
+  /**
+   * Directly adjust stock by delta (+1, -1, +5, -5) and persist immediately to Supabase
+   */
   const handleStockAdjust = async (p: Product, delta: number) => {
     const newStock = Math.max(0, p.stock + delta)
+    setStockUpdatingId(p._id)
+    try {
+      setSuccessMsg('')
+      setError('')
+      // Update real database in Supabase
+      await updateProductStock(p._id, newStock)
+      
+      // Update local state immediately
+      setProducts(prev =>
+        (Array.isArray(prev) ? prev : []).map(item =>
+          item._id === p._id
+            ? { ...item, stock: newStock, badge: newStock < 10 ? 'Low Stock' : (item.badge === 'Low Stock' ? undefined : item.badge) }
+            : item
+        )
+      )
+
+      if (newStock < 10) {
+        setSuccessMsg(`Stock for "${p.name}" updated to ${newStock} Pcs in Supabase. [LOW STOCK ALERT: Under 10 Units!]`)
+      } else {
+        setSuccessMsg(`Stock for "${p.name}" updated to ${newStock} Pcs in Supabase database.`)
+      }
+    } catch (err: any) {
+      console.error('Stock adjustment error:', err)
+      setError(`Failed to update stock for ${p.name} in database.`)
+    } finally {
+      setStockUpdatingId(null)
+    }
+  }
+
+  /**
+   * Save exact typed stock number to Supabase database
+   */
+  const handleSaveInlineStock = async (p: Product) => {
+    const newStock = Math.max(0, Number(tempStockValue) || 0)
+    setStockUpdatingId(p._id)
     try {
       setSuccessMsg('')
       setError('')
       await updateProductStock(p._id, newStock)
-      setProducts(prev => (Array.isArray(prev) ? prev : []).map(item => item._id === p._id ? { ...item, stock: newStock } : item))
-      setSuccessMsg(`Stock for "${p.name}" updated to ${newStock} Pcs`)
+      setProducts(prev =>
+        (Array.isArray(prev) ? prev : []).map(item =>
+          item._id === p._id
+            ? { ...item, stock: newStock, badge: newStock < 10 ? 'Low Stock' : (item.badge === 'Low Stock' ? undefined : item.badge) }
+            : item
+        )
+      )
+      setEditingStockId(null)
+      if (newStock < 10) {
+        setSuccessMsg(`Real stock for "${p.name}" updated to ${newStock} Pcs in Supabase. [LOW STOCK ALERT]`)
+      } else {
+        setSuccessMsg(`Real stock for "${p.name}" updated to ${newStock} Pcs in Supabase.`)
+      }
     } catch (err: any) {
       console.error(err)
-      setError('Failed to update product stock.')
+      setError(`Failed to save stock for ${p.name} in database.`)
+    } finally {
+      setStockUpdatingId(null)
     }
   }
 
@@ -588,7 +671,7 @@ export default function AdminDashboard() {
       setError('')
       await updateOrderStatus(orderId, newStatus)
       setOrders(prev => (Array.isArray(prev) ? prev : []).map(o => o._id === orderId ? { ...o, orderStatus: newStatus } : o))
-      setSuccessMsg(`Order status updated to "${newStatus}"`)
+      setSuccessMsg(`Order status updated to "${newStatus}" in database.`)
     } catch (err: any) {
       setError('Failed to update order status.')
     }
@@ -665,7 +748,10 @@ export default function AdminDashboard() {
 
       {successMsg && (
         <div className="p-4 bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 rounded-2xl text-xs font-semibold animate-fade-in shadow-lg flex items-center justify-between">
-          <span>{successMsg}</span>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>{successMsg}</span>
+          </div>
           <button onClick={() => setSuccessMsg('')} className="text-emerald-400 hover:text-white font-bold text-xs ml-4 cursor-pointer">✕</button>
         </div>
       )}
@@ -709,14 +795,20 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Card 3: Inventory Units */}
+        {/* Card 3: Inventory Units & Low Stock Alert Indicator */}
         <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl p-5 shadow-xl space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-stone-400">{t('stat.inventoryUnits')}</span>
-            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded-md text-[10px] font-bold border border-amber-500/20">STOCK</span>
+            {lowStockCount > 0 ? (
+              <span className="px-2 py-0.5 bg-rose-950/80 text-rose-300 rounded-md text-[10px] font-extrabold border border-rose-500/40 animate-pulse">
+                {lowStockCount} LOW STOCK
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded-md text-[10px] font-bold border border-amber-500/20">STOCK</span>
+            )}
           </div>
           <div className="text-3xl font-extrabold text-stone-100">{totalStockCount} Pcs</div>
-          <div className="text-[11px] font-medium text-amber-400">
+          <div className="text-[11px] font-medium text-stone-400">
             Across {products.length} Active Catalog Items
           </div>
         </div>
@@ -749,13 +841,18 @@ export default function AdminDashboard() {
 
         <button
           onClick={() => setActiveTab('PRODUCTS')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer flex items-center gap-2 ${
             activeTab === 'PRODUCTS'
               ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 font-bold shadow-md shadow-orange-500/20'
               : 'bg-[#16110E] text-stone-400 hover:text-white border border-stone-800'
           }`}
         >
-          {t('tab.products')} ({safeProducts.length})
+          <span>{t('tab.products')} ({safeProducts.length})</span>
+          {lowStockCount > 0 && (
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${activeTab === 'PRODUCTS' ? 'bg-stone-950 text-orange-400' : 'bg-rose-950/80 text-rose-300 border border-rose-500/30'}`}>
+              {lowStockCount} Low
+            </span>
+          )}
         </button>
 
         <button
@@ -947,16 +1044,79 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* ── TAB 2: PRODUCTS ── */}
+      {/* ── TAB 2: PRODUCTS & REAL STOCK MANAGEMENT ── */}
       {activeTab === 'PRODUCTS' && (
-        <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl overflow-hidden shadow-2xl">
-          <div className="p-5 border-b border-stone-800 flex items-center justify-between bg-[#0E0B09]/80">
-            <h3 className="text-base font-bold text-orange-400">Live Product & Stock Catalog</h3>
-            <span className="text-xs text-stone-400 font-medium">Total Inventory: {safeProducts.reduce((acc, p) => acc + (p.stock || 0), 0)} Units</span>
+        <div className="bg-[#16110E] border border-orange-500/15 rounded-3xl overflow-hidden shadow-2xl space-y-0">
+          {/* Products Header Bar with Low Stock Filter */}
+          <div className="p-5 border-b border-stone-800 flex flex-wrap items-center justify-between gap-4 bg-[#0E0B09]/80">
+            <div>
+              <h3 className="text-base font-bold text-orange-400">Live Product & Stock Catalog (Supabase Database)</h3>
+              <p className="text-xs text-stone-400 mt-0.5">
+                Total Inventory: <strong className="text-white">{safeProducts.reduce((acc, p) => acc + (p.stock || 0), 0)} Units</strong> across {safeProducts.length} products
+              </p>
+            </div>
+
+            {/* Quick Filter Buttons: All vs Low Stock */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setStockFilter('ALL')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  stockFilter === 'ALL'
+                    ? 'bg-orange-500 text-stone-950 shadow-md shadow-orange-500/20'
+                    : 'bg-[#16110E] text-stone-400 hover:text-white border border-stone-800'
+                }`}
+              >
+                {t('stock.allProducts')} ({safeProducts.length})
+              </button>
+
+              <button
+                onClick={() => setStockFilter('LOW_STOCK')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  stockFilter === 'LOW_STOCK'
+                    ? 'bg-rose-500 text-white shadow-md shadow-rose-500/20'
+                    : 'bg-rose-950/40 text-rose-300 hover:bg-rose-950/70 border border-rose-500/30'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
+                <span>{t('stock.onlyLowStock')} ({lowStockCount})</span>
+              </button>
+
+              <button
+                onClick={fetchData}
+                className="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                title="Refresh products from database"
+              >
+                ↻
+              </button>
+            </div>
           </div>
 
+          {/* Low Stock Warning Banner if any items are under 10 */}
+          {lowStockCount > 0 && stockFilter === 'ALL' && (
+            <div className="px-5 py-3 bg-amber-950/40 border-b border-amber-500/30 flex items-center justify-between text-xs text-amber-200">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded font-bold text-[10px] border border-amber-500/40">
+                  ATTENTION
+                </span>
+                <span>
+                  <strong>{lowStockCount} product{lowStockCount > 1 ? 's have' : ' has'} low stock (&lt; 10 units).</strong> Items below 10 are highlighted with "Low Stock" badge.
+                </span>
+              </div>
+              <button
+                onClick={() => setStockFilter('LOW_STOCK')}
+                className="text-amber-400 hover:underline font-bold text-xs cursor-pointer"
+              >
+                Filter Low Stock Items &rarr;
+              </button>
+            </div>
+          )}
+
           {loading ? (
-            <div className="p-12 text-center text-xs font-semibold text-orange-400">Loading catalog items...</div>
+            <div className="p-12 text-center text-xs font-semibold text-orange-400">Loading catalog items from database...</div>
+          ) : displayedProducts.length === 0 ? (
+            <div className="p-12 text-center text-xs text-stone-400">
+              {stockFilter === 'LOW_STOCK' ? 'No items are currently below 10 stock units. All inventory levels are healthy!' : 'No products found in database.'}
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
@@ -966,68 +1126,165 @@ export default function AdminDashboard() {
                     <th className="p-4">Product Details</th>
                     <th className="p-4">Category</th>
                     <th className="p-4">Price</th>
-                    <th className="p-4">Stock Control</th>
+                    <th className="p-4 min-w-[200px]">Real Stock in Database</th>
                     <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-800/80 text-stone-200">
-                  {safeProducts.map(p => (
-                    <tr key={p._id} className="hover:bg-[#1E1713] transition-colors">
-                      <td className="p-4">
-                        <img
-                          src={p.images?.[0] || 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?auto=format&fit=crop&w=600&q=80'}
-                          alt={p.name}
-                          className="w-12 h-12 object-cover rounded-xl border border-stone-700 shadow-md"
-                        />
-                      </td>
-                      <td className="p-4 space-y-0.5">
-                        <div className="font-bold text-white text-sm">{p.name}</div>
-                        {p.badge && (
-                          <span className="inline-block text-[10px] font-bold uppercase text-orange-300 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
-                            {p.badge}
-                          </span>
-                        )}
-                        <div className="text-[11px] text-stone-400">{p.netWeight || '300g'} | {p.pieces || 'Standard'}</div>
-                      </td>
-                      <td className="p-4 font-semibold text-amber-400">{p.category}</td>
-                      <td className="p-4 font-bold text-white text-sm">
-                        ₹{p.weights?.[0]?.price || 299}
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
+                  {displayedProducts.map(p => {
+                    const isLowStock = p.stock < 10 && p.stock > 0
+                    const isOutOfStock = p.stock === 0
+                    const isEditingThisStock = editingStockId === p._id
+                    const isSavingThis = stockUpdatingId === p._id
+
+                    return (
+                      <tr key={p._id} className={`hover:bg-[#1E1713] transition-colors ${isLowStock ? 'bg-amber-950/10' : (isOutOfStock ? 'bg-rose-950/15' : '')}`}>
+                        <td className="p-4">
+                          <img
+                            src={p.images?.[0] || 'https://images.unsplash.com/photo-1534604973900-c43ab4c2e0ab?auto=format&fit=crop&w=600&q=80'}
+                            alt={p.name}
+                            className="w-12 h-12 object-cover rounded-xl border border-stone-700 shadow-md"
+                          />
+                        </td>
+                        <td className="p-4 space-y-1">
+                          <div className="font-bold text-white text-sm flex items-center gap-2">
+                            <span>{p.name}</span>
+                            {/* Low Stock Badge */}
+                            {isOutOfStock ? (
+                              <span className="inline-block text-[9px] font-extrabold uppercase text-rose-300 bg-rose-950/80 px-2 py-0.5 rounded-full border border-rose-500/50">
+                                OUT OF STOCK
+                              </span>
+                            ) : isLowStock ? (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-500/50 animate-pulse">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                LOW STOCK (&lt;10)
+                              </span>
+                            ) : p.badge ? (
+                              <span className="inline-block text-[9px] font-bold uppercase text-orange-300 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
+                                {p.badge}
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="text-[11px] text-stone-400">{p.netWeight || '300g'} | {p.pieces || 'Standard'}</div>
+                        </td>
+                        <td className="p-4 font-semibold text-amber-400">{p.category}</td>
+                        <td className="p-4 font-bold text-white text-sm">
+                          ₹{p.weights?.[0]?.price || 299}
+                        </td>
+                        <td className="p-4">
+                          {/* Stock Controls + Direct Persistence to Database */}
+                          <div className="space-y-1.5">
+                            {isEditingThisStock ? (
+                              /* Inline Direct Number Edit Mode */
+                              <div className="flex items-center gap-1.5 animate-fade-in">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={tempStockValue}
+                                  onChange={(e) => setTempStockValue(Number(e.target.value))}
+                                  className="w-20 p-1.5 bg-[#0E0B09] border border-orange-500 rounded-lg text-white font-bold text-xs text-center focus:outline-none"
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => handleSaveInlineStock(p)}
+                                  disabled={isSavingThis}
+                                  className="px-2.5 py-1.5 bg-orange-500 hover:bg-orange-400 text-stone-950 font-bold text-[11px] rounded-lg cursor-pointer"
+                                >
+                                  {isSavingThis ? '...' : 'Save'}
+                                </button>
+                                <button
+                                  onClick={() => setEditingStockId(null)}
+                                  className="px-2 py-1.5 bg-stone-800 text-stone-300 font-bold text-[11px] rounded-lg cursor-pointer"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ) : (
+                              /* Standard Fast Quick Adjustment Controls */
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={() => handleStockAdjust(p, -5)}
+                                  disabled={isSavingThis || p.stock === 0}
+                                  title="Reduce 5 units in database"
+                                  className="px-2 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold text-xs cursor-pointer disabled:opacity-30"
+                                >
+                                  -5
+                                </button>
+                                <button
+                                  onClick={() => handleStockAdjust(p, -1)}
+                                  disabled={isSavingThis || p.stock === 0}
+                                  title="Reduce 1 unit in database"
+                                  className="px-2 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold text-xs cursor-pointer disabled:opacity-30"
+                                >
+                                  -1
+                                </button>
+
+                                {/* Stock Quantity Badge (Clickable to open inline edit) */}
+                                <button
+                                  onClick={() => {
+                                    setEditingStockId(p._id)
+                                    setTempStockValue(p.stock)
+                                  }}
+                                  title="Click to type exact stock number"
+                                  className={`font-bold px-2.5 py-1 rounded-lg border text-xs cursor-pointer transition-all hover:scale-105 ${
+                                    isOutOfStock
+                                      ? 'bg-rose-950/80 text-rose-300 border-rose-500/50'
+                                      : isLowStock
+                                      ? 'bg-amber-950/80 text-amber-300 border-amber-500/50 shadow-sm shadow-amber-900/30'
+                                      : 'bg-emerald-950/40 text-emerald-400 border-emerald-500/30'
+                                  }`}
+                                >
+                                  {isSavingThis ? 'Saving...' : `${p.stock} Pcs`}
+                                </button>
+
+                                <button
+                                  onClick={() => handleStockAdjust(p, +1)}
+                                  disabled={isSavingThis}
+                                  title="Add 1 unit to database"
+                                  className="px-2 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold text-xs cursor-pointer"
+                                >
+                                  +1
+                                </button>
+                                <button
+                                  onClick={() => handleStockAdjust(p, +5)}
+                                  disabled={isSavingThis}
+                                  title="Add 5 units to database"
+                                  className="px-2 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold text-xs cursor-pointer"
+                                >
+                                  +5
+                                </button>
+                              </div>
+                            )}
+
+                            {/* Status label under stock */}
+                            <div className="text-[10px] font-semibold">
+                              {isOutOfStock ? (
+                                <span className="text-rose-400">Out of Stock (Restock needed)</span>
+                              ) : isLowStock ? (
+                                <span className="text-amber-400">Low Stock Alert (&lt;10 Pcs)</span>
+                              ) : (
+                                <span className="text-emerald-400/80">Available in Database</span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4 text-right space-x-2">
                           <button
-                            onClick={() => handleStockAdjust(p, -5)}
-                            className="px-2.5 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold cursor-pointer"
+                            onClick={() => handleOpenEditModal(p)}
+                            className="px-3 py-1.5 bg-orange-500/15 hover:bg-orange-500/25 text-orange-300 border border-orange-500/30 rounded-xl font-semibold transition-colors cursor-pointer"
                           >
-                            -5
+                            Edit
                           </button>
-                          <span className={`font-bold px-2.5 py-1 rounded-lg border text-xs ${p.stock > 10 ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/30' : 'bg-rose-950/40 text-rose-400 border-rose-500/30'}`}>
-                            {p.stock} Pcs
-                          </span>
                           <button
-                            onClick={() => handleStockAdjust(p, +5)}
-                            className="px-2.5 py-1 bg-[#0E0B09] hover:bg-stone-800 border border-stone-700 rounded-lg text-stone-300 font-semibold cursor-pointer"
+                            onClick={() => handleDeleteProduct(p._id, p.name)}
+                            className="px-3 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 rounded-xl font-semibold transition-colors cursor-pointer"
                           >
-                            +5
+                            Delete
                           </button>
-                        </div>
-                      </td>
-                      <td className="p-4 text-right space-x-2">
-                        <button
-                          onClick={() => handleOpenEditModal(p)}
-                          className="px-3 py-1.5 bg-orange-500/15 hover:bg-orange-500/25 text-orange-300 border border-orange-500/30 rounded-xl font-semibold transition-colors cursor-pointer"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(p._id, p.name)}
-                          className="px-3 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 rounded-xl font-semibold transition-colors cursor-pointer"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -1628,14 +1885,14 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0E0B09]/80 backdrop-blur-md animate-fade-in">
           <div className="bg-[#16110E] border border-orange-500/30 rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl text-stone-100">
             <div className="flex items-center justify-between pb-3 border-b border-stone-800">
-              <h3 className="text-base font-bold text-orange-400">{editingId ? 'Edit Product Details' : 'Add New Seafood Product'}</h3>
+              <h3 className="text-base font-bold text-orange-400">{editingId ? 'Edit Product & Stock in Database' : 'Add New Seafood Product to Database'}</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-stone-400 hover:text-white font-bold cursor-pointer">✕</button>
             </div>
 
             <form onSubmit={handleSaveProduct} className="space-y-4 text-xs font-medium">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-stone-300">Product Name</label>
+                  <label className="text-stone-300 font-bold">Product Name</label>
                   <input
                     type="text"
                     required
@@ -1647,7 +1904,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-stone-300">Category</label>
+                  <label className="text-stone-300 font-bold">Category</label>
                   <select
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value })}
@@ -1660,7 +1917,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-stone-300">Price (₹)</label>
+                  <label className="text-stone-300 font-bold">Price (₹)</label>
                   <input
                     type="number"
                     required
@@ -1670,30 +1927,46 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-stone-300">Initial Stock (Pcs)</label>
+                {/* Initial Stock Quantity Field with Low Stock Warning Notice */}
+                <div className="space-y-1 sm:col-span-2 p-3 bg-[#0E0B09] rounded-2xl border border-orange-500/20">
+                  <div className="flex items-center justify-between">
+                    <label className="text-stone-300 font-bold">Stock Quantity in Database (Pcs)</label>
+                    {Number(formData.stock) < 10 ? (
+                      <span className="text-[10px] font-extrabold text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-500/40 animate-pulse">
+                        LOW STOCK ALERT (&lt;10)
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-emerald-400">In Stock</span>
+                    )}
+                  </div>
                   <input
                     type="number"
+                    min="0"
                     required
                     value={formData.stock}
                     onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
-                    className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
+                    className="w-full p-3 bg-[#16110E] border border-stone-800 rounded-xl text-white font-bold focus:outline-none focus:border-orange-500"
                   />
+                  {Number(formData.stock) < 10 && (
+                    <p className="text-[11px] text-amber-300/90 font-medium pt-1">
+                      Notice: Stock quantity is below 10. This item will be flagged with a "Low Stock" indicator in the store and admin catalog.
+                    </p>
+                  )}
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-stone-300">Badge Tag</label>
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-stone-300 font-bold">Badge Tag (e.g. Bestseller, Fresh Catch)</label>
                   <input
                     type="text"
                     value={formData.badge}
                     onChange={e => setFormData({ ...formData, badge: e.target.value })}
-                    placeholder="e.g. Bestseller, Fresh Catch"
+                    placeholder="e.g. Bestseller, Fresh Catch, Low Stock"
                     className="w-full p-3 bg-[#0E0B09] border border-stone-800 rounded-xl text-white focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-stone-300">Image Picture URL</label>
+                  <label className="text-stone-300 font-bold">Image Picture URL</label>
                   <input
                     type="text"
                     required
@@ -1705,7 +1978,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-stone-300">Description</label>
+                  <label className="text-stone-300 font-bold">Description</label>
                   <textarea
                     rows={2}
                     value={formData.description}
@@ -1715,7 +1988,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-stone-300">Cutting Options (Comma separated)</label>
+                  <label className="text-stone-300 font-bold">Cutting Options (Comma separated)</label>
                   <input
                     type="text"
                     value={formData.cuts}
@@ -1730,7 +2003,7 @@ export default function AdminDashboard() {
                 type="submit"
                 className="w-full py-3.5 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-400 hover:via-amber-400 hover:to-orange-400 text-stone-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-transform active:scale-95 cursor-pointer"
               >
-                Save Product to Catalog
+                Save Product & Stock to Database
               </button>
             </form>
           </div>
